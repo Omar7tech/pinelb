@@ -23,9 +23,6 @@ class Product extends Model
     protected $casts = [
         'order_type' => OrderType::class,
         'variants' => 'array',
-        'has_schedule' => 'boolean',
-        'is_spicy' => 'boolean',
-        'is_vegan' => 'boolean',
     ];
     public function category(): BelongsTo
     {
