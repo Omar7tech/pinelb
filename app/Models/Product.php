@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderType;
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,14 +17,12 @@ use Spatie\Sluggable\Attributes\Sluggable;
 #[Guarded(['id'])]
 class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
-    use HasFactory , InteractsWithMedia;
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory, InteractsWithMedia;
 
-
-    protected $casts = [
-        'order_type' => OrderType::class,
-        'variants' => 'array',
-    ];
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -53,5 +52,21 @@ class Product extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'discount_price' => 'decimal:2',
+            'is_active' => 'boolean',
+            'is_featured' => 'boolean',
+            'order_type' => OrderType::class,
+            'price' => 'decimal:2',
+            'sort_order' => 'integer',
+            'variants' => 'array',
+        ];
     }
 }

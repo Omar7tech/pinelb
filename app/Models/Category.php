@@ -2,21 +2,26 @@
 
 namespace App\Models;
 
-
+use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Sluggable\Attributes\Sluggable;
 
 #[Sluggable(from: 'title', to: 'slug')]
 #[Guarded(['id'])]
-class Category extends Model
+class Category extends Model implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\CategoryFactory> */
-    use HasFactory;
+    /** @use HasFactory<CategoryFactory> */
+    use HasFactory, InteractsWithMedia;
 
+    /**
+     * @return HasMany<Product, $this>
+     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
@@ -37,7 +42,10 @@ class Category extends Model
             ->quality(70);
     }
 
-     protected function casts(): array
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
