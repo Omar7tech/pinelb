@@ -20,7 +20,7 @@ function HeroButton({
     return (
         <Button
             size="lg"
-            className="relative isolate h-12 gap-3 overflow-hidden border-primary bg-primary px-9 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary"
+            className="relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border-primary bg-primary px-8 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary sm:h-12 sm:w-auto sm:px-9"
         >
             <span
                 aria-hidden
@@ -45,7 +45,7 @@ export default function Welcome() {
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
                     <PineLogo className="w-full max-w-sm select-none" />
-                    <div className="flex animate-in flex-wrap items-center justify-center gap-4 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
+                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-3 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
                         <HeroButton icon={UtensilsCrossed} label="Menu" />
                         <HeroButton
                             icon={CalendarCheck}
