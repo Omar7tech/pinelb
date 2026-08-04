@@ -19,11 +19,11 @@
 }
 
 @theme {
-    --animate-logo-sprout: logo-sprout 0.7s cubic-bezier(0.34, 1.4, 0.64, 1)
+    --animate-logo-sprout: logo-sprout 0.45s cubic-bezier(0.34, 1.4, 0.64, 1)
         backwards;
-    --animate-logo-letter: logo-letter 0.6s cubic-bezier(0.22, 1, 0.36, 1)
+    --animate-logo-letter: logo-letter 0.38s cubic-bezier(0.22, 1, 0.36, 1)
         backwards;
-    --animate-logo-tagline: logo-tagline 0.9s ease-out backwards;
+    --animate-logo-tagline: logo-tagline 0.55s ease-out backwards;
 
     /* Each vector scales out of its own footprint, so the tree grows upward
        instead of sliding as one block. */

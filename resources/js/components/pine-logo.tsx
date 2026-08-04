@@ -82,10 +82,10 @@ const TAGLINE_PATHS: readonly string[] = [
     'M332.68,119.92h6.18v1.47h-7.83v-11.82h7.58v1.45h-5.93v3.54h5.58v1.42h-5.58v3.94Z',
 ];
 
-const MARK_STEP_MS = 90;
-const WORDMARK_START_MS = 780;
-const WORDMARK_STEP_MS = 90;
-const TAGLINE_START_MS = 1180;
+const MARK_STEP_MS = 50;
+const WORDMARK_START_MS = 430;
+const WORDMARK_STEP_MS = 50;
+const TAGLINE_START_MS = 660;
 
 export function PineLogo({ className }: { className?: string }) {
     return (

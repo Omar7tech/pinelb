@@ -45,7 +45,7 @@ export default function Welcome() {
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
                     <PineLogo className="w-full max-w-sm select-none" />
-                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-3 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-3 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
                         <HeroButton icon={UtensilsCrossed} label="Menu" />
                         <HeroButton
                             icon={CalendarCheck}
@@ -53,7 +53,7 @@ export default function Welcome() {
                         />
                     </div>
                 </div>
-                <Treeline className="animate-in delay-1900 duration-1000 ease-out fill-mode-backwards fade-in slide-in-from-bottom-6 motion-reduce:animate-none" />
+                <Treeline className="animate-in delay-1000 duration-600 ease-out fill-mode-backwards fade-in slide-in-from-bottom-6 motion-reduce:animate-none" />
             </div>
         </>
     );
