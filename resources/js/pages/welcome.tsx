@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import { CalendarCheck, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Welcome() {
@@ -13,9 +14,11 @@ export default function Welcome() {
                 />
                 <div className="flex flex-wrap items-center justify-center gap-4">
                     <Button size="lg" className="h-11 px-8 text-base">
+                        <UtensilsCrossed className="size-5" />
                         Menu
                     </Button>
                     <Button size="lg" className="h-11 px-8 text-base">
+                        <CalendarCheck className="size-5" />
                         Reserve your spot
                     </Button>
                 </div>
