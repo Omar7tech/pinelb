@@ -51,12 +51,18 @@ export default function Welcome() {
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
                     <PineLogo className="w-full max-w-sm select-none" />
-                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-6 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:max-w-md">
-                        <fieldset className="rounded-3xl border border-primary/25 px-5 pt-1 pb-5">
-                            <legend className="px-3 text-xs font-medium tracking-[0.2em] text-primary/70 uppercase">
+                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-4 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:max-w-md">
+                        <section
+                            aria-labelledby="menu-heading"
+                            className="rounded-[1.75rem] border border-primary/20 bg-primary/5 p-4 sm:p-5"
+                        >
+                            <h2
+                                id="menu-heading"
+                                className="text-center text-2xl font-semibold tracking-[0.22em] text-primary uppercase sm:text-3xl"
+                            >
                                 Menu
-                            </legend>
-                            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                            </h2>
+                            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:gap-3">
                                 <HeroButton
                                     icon={UtensilsCrossed}
                                     label="Dine in"
@@ -68,7 +74,7 @@ export default function Welcome() {
                                     className="sm:flex-1 sm:px-6"
                                 />
                             </div>
-                        </fieldset>
+                        </section>
                         <HeroButton
                             icon={CalendarCheck}
                             label="Reserve your spot"
