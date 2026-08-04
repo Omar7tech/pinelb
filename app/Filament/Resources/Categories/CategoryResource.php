@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Categories;
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Filament\Resources\Categories\Pages\ListCategories;
-use App\Filament\Resources\Categories\Pages\ManageCategoryProducts;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
 use App\Filament\Resources\Categories\Schemas\CategoryForm;
 use App\Filament\Resources\Categories\Schemas\CategoryInfolist;
@@ -51,7 +50,6 @@ class CategoryResource extends Resource
         return $page->generateNavigationItems([
             ViewCategory::class,
             EditCategory::class,
-            ManageCategoryProducts::class,
         ]);
     }
 
@@ -62,7 +60,6 @@ class CategoryResource extends Resource
             'create' => CreateCategory::route('/create'),
             'view' => ViewCategory::route('/{record}'),
             'edit' => EditCategory::route('/{record}/edit'),
-            'products' => ManageCategoryProducts::route('/{record}/products'),
         ];
     }
 }

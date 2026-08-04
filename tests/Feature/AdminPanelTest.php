@@ -3,7 +3,6 @@
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Filament\Resources\Categories\Pages\ListCategories;
-use App\Filament\Resources\Categories\Pages\ManageCategoryProducts;
 use App\Filament\Resources\Categories\Pages\ViewCategory;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
@@ -45,7 +44,7 @@ it('renders category pages', function (string $page): void {
     Livewire::test($page, in_array($page, [ListCategories::class, CreateCategory::class], true)
         ? []
         : ['record' => $this->category->getRouteKey()])->assertOk();
-})->with([ListCategories::class, CreateCategory::class, ViewCategory::class, EditCategory::class, ManageCategoryProducts::class]);
+})->with([ListCategories::class, CreateCategory::class, ViewCategory::class, EditCategory::class]);
 
 it('creates and edits a product through the form', function (): void {
     Livewire::test(CreateProduct::class)
