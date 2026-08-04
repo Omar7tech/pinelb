@@ -21,7 +21,7 @@ class Product extends Model
 
 
     protected $casts = [
-        /* 'order_type' => OrderType::class, */
+        'order_type' => OrderType::class,
         'variants' => 'array',
         'has_schedule' => 'boolean',
         'is_spicy' => 'boolean',

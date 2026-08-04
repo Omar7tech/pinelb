@@ -4,7 +4,7 @@ use App\Models\Category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
+use App\Enums\OrderType;
 return new class extends Migration
 {
     /**
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedMediumInteger('sort_order')->default(0);
             $table->decimal('price', 8, 2);
             $table->decimal('discount_price', 8, 2)->nullable();
-            /* $table->string('order_type')->default(OrderType::BOTH->value); */
+            $table->string('order_type')->default(OrderType::BOTH->value);
             $table->json('variants')->nullable();
             $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
