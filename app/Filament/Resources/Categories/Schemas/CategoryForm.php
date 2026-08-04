@@ -47,6 +47,7 @@ class CategoryForm
                     ->components([
                         Repeater::make('addons')
                             ->hiddenLabel()
+                            ->defaultItems(0)
                             ->table([
                                 TableColumn::make('Name')->markAsRequired(),
                                 TableColumn::make('Price')->markAsRequired(),

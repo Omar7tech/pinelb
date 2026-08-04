@@ -92,6 +92,7 @@ class ProductForm
                             ->schema([
                                 Repeater::make('variants')
                                     ->hiddenLabel()
+                                    ->defaultItems(0)
                                     ->table([
                                         TableColumn::make('Name')->markAsRequired(),
                                         TableColumn::make('Price')->markAsRequired(),

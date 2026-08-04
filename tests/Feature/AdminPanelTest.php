@@ -66,3 +66,28 @@ it('creates and edits a product through the form', function (): void {
     expect(Product::where('title', 'Cheese saj')->exists())->toBeTrue()
         ->and($this->product->fresh()->title)->toBe('Updated crepe');
 });
+
+it('creates a product without any variants', function (): void {
+    Livewire::test(CreateProduct::class)
+        ->assertFormSet(['variants' => []])
+        ->fillForm([
+            'title' => 'Zaatar saj',
+            'category_id' => $this->category->id,
+            'price' => 2,
+            'order_type' => 'both',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Product::where('title', 'Zaatar saj')->value('variants'))->toBe([]);
+});
+
+it('creates a category without any add-ons', function (): void {
+    Livewire::test(CreateCategory::class)
+        ->assertFormSet(['addons' => []])
+        ->fillForm(['title' => 'Manakish'])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Category::where('title', 'Manakish')->value('addons'))->toBe([]);
+});
