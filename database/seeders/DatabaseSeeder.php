@@ -22,5 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@pinelb.com',
             'password' => bcrypt('password'),
         ]);
+
+        $this->call(MenuSeeder::class);
     }
 }
