@@ -44,7 +44,8 @@ export default function Welcome() {
                 <img
                     src="/logos/pine-logo-horizontal.svg"
                     alt="Pine"
-                    className="w-full max-w-sm"
+                    draggable={false}
+                    className="w-full max-w-sm select-none"
                 />
                 <div className="flex flex-wrap items-center justify-center gap-4">
                     <HeroButton icon={UtensilsCrossed} label="Menu" />
