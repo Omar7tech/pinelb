@@ -54,7 +54,7 @@ class ProductsTable
                     ->label('Variants')
                     ->badge()
                     ->color('gray')
-                    ->state(fn (?array $state): int => count($state ?? [])),
+                    ->state(fn (Product $record): int => count($record->variants ?? [])),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->sortable(),
