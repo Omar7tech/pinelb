@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import { CalendarCheck, UtensilsCrossed } from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
+import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -41,15 +42,18 @@ export default function Welcome() {
     return (
         <>
             <Head title="Welcome" />
-            <div className="flex min-h-svh flex-col items-center justify-center gap-10 px-6">
-                <PineLogo className="w-full max-w-sm select-none" />
-                <div className="flex animate-in flex-wrap items-center justify-center gap-4 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
-                    <HeroButton icon={UtensilsCrossed} label="Menu" />
-                    <HeroButton
-                        icon={CalendarCheck}
-                        label="Reserve your spot"
-                    />
+            <div className="flex min-h-svh flex-col">
+                <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+                    <PineLogo className="w-full max-w-sm select-none" />
+                    <div className="flex animate-in flex-wrap items-center justify-center gap-4 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
+                        <HeroButton icon={UtensilsCrossed} label="Menu" />
+                        <HeroButton
+                            icon={CalendarCheck}
+                            label="Reserve your spot"
+                        />
+                    </div>
                 </div>
+                <Treeline className="animate-in delay-1900 duration-1000 ease-out fill-mode-backwards fade-in slide-in-from-bottom-6 motion-reduce:animate-none" />
             </div>
         </>
     );
