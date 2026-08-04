@@ -1,9 +1,10 @@
 import { Head } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
-import { CalendarCheck, UtensilsCrossed } from 'lucide-react';
+import { Bike, CalendarCheck, UtensilsCrossed } from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 /**
  * Landing call-to-action. Sage by default; on hover a cream panel wipes up from
@@ -13,14 +14,19 @@ import { Button } from '@/components/ui/button';
 function HeroButton({
     icon: Icon,
     label,
+    className,
 }: {
     icon: LucideIcon;
     label: string;
+    className?: string;
 }) {
     return (
         <Button
             size="lg"
-            className="relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border-primary bg-primary px-8 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary sm:h-12 sm:w-auto sm:px-9"
+            className={cn(
+                'relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border-primary bg-primary px-8 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary sm:h-12 sm:w-auto sm:px-9',
+                className,
+            )}
         >
             <span
                 aria-hidden
@@ -45,11 +51,28 @@ export default function Welcome() {
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
                     <PineLogo className="w-full max-w-sm select-none" />
-                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-3 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center sm:gap-4">
-                        <HeroButton icon={UtensilsCrossed} label="Menu" />
+                    <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-6 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:max-w-md">
+                        <fieldset className="rounded-3xl border border-primary/25 px-5 pt-1 pb-5">
+                            <legend className="px-3 text-xs font-medium tracking-[0.2em] text-primary/70 uppercase">
+                                Menu
+                            </legend>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                                <HeroButton
+                                    icon={UtensilsCrossed}
+                                    label="Dine in"
+                                    className="sm:flex-1 sm:px-6"
+                                />
+                                <HeroButton
+                                    icon={Bike}
+                                    label="Delivery"
+                                    className="sm:flex-1 sm:px-6"
+                                />
+                            </div>
+                        </fieldset>
                         <HeroButton
                             icon={CalendarCheck}
                             label="Reserve your spot"
+                            className="self-center sm:w-auto"
                         />
                     </div>
                 </div>
