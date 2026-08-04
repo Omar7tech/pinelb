@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import { CalendarCheck, UtensilsCrossed } from 'lucide-react';
+import { PineLogo } from '@/components/pine-logo';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -41,13 +42,8 @@ export default function Welcome() {
         <>
             <Head title="Welcome" />
             <div className="flex min-h-svh flex-col items-center justify-center gap-10 px-6">
-                <img
-                    src="/logos/pine-logo-horizontal.svg"
-                    alt="Pine"
-                    draggable={false}
-                    className="w-full max-w-sm select-none"
-                />
-                <div className="flex flex-wrap items-center justify-center gap-4">
+                <PineLogo className="w-full max-w-sm select-none" />
+                <div className="flex animate-in flex-wrap items-center justify-center gap-4 delay-1500 duration-700 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
                     <HeroButton icon={UtensilsCrossed} label="Menu" />
                     <HeroButton
                         icon={CalendarCheck}
