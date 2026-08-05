@@ -46,6 +46,12 @@ class ProductForm
                                 Textarea::make('description')
                                     ->rows(3)
                                     ->columnSpanFull(),
+                                TextInput::make('preparation_time')
+                                    ->label('Preparation time')
+                                    ->helperText('Roughly how long the item takes, shown on its details.')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('min'),
                                 SpatieMediaLibraryFileUpload::make('image')
                                     ->collection('image')
                                     ->disk('public')
@@ -83,6 +89,14 @@ class ProductForm
                                     ->inline(false),
                                 Toggle::make('is_featured')
                                     ->label('Featured')
+                                    ->default(false)
+                                    ->inline(false),
+                                Toggle::make('is_spicy')
+                                    ->label('Spicy')
+                                    ->default(false)
+                                    ->inline(false),
+                                Toggle::make('is_vegan')
+                                    ->label('Vegan')
                                     ->default(false)
                                     ->inline(false),
                             ]),

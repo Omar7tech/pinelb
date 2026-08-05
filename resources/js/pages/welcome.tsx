@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import { Bike, CalendarCheck, UtensilsCrossed } from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
@@ -10,24 +10,61 @@ import { cn } from '@/lib/utils';
  * Landing call-to-action. Sage by default; on hover a cream panel wipes up from
  * the baseline, the label inverts to sage, and the icon rolls over to a fresh
  * copy of itself.
+ *
+ * Passing `href` turns the button into an Inertia link; `disabled` keeps the
+ * shape but drops the navigation (used when delivery is switched off).
  */
 function HeroButton({
     icon: Icon,
     label,
+    href,
+    disabled = false,
+    title,
     className,
 }: {
     icon: LucideIcon;
     label: string;
+    href?: string;
+    disabled?: boolean;
+    title?: string;
     className?: string;
 }) {
+    const interactive = href !== undefined && !disabled;
+
     return (
         <Button
+            asChild={interactive}
             size="lg"
+            // `disabled` is only a valid attribute on the plain button shape;
+            // when the button renders as a link it must not be forwarded.
+            disabled={interactive ? undefined : disabled}
+            title={title}
             className={cn(
                 'relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border-primary bg-primary px-8 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary sm:h-12 sm:w-auto sm:px-9',
                 className,
             )}
         >
+            {interactive ? (
+                <Link href={href}>
+                    <HeroButtonBody icon={Icon} label={label} />
+                </Link>
+            ) : (
+                <HeroButtonBody icon={Icon} label={label} />
+            )}
+        </Button>
+    );
+}
+
+/** The wipe panel, rolling icon and label shared by both button shapes. */
+function HeroButtonBody({
+    icon: Icon,
+    label,
+}: {
+    icon: LucideIcon;
+    label: string;
+}) {
+    return (
+        <>
             <span
                 aria-hidden
                 className="absolute inset-0 -z-10 origin-bottom scale-y-0 bg-background transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/button:scale-y-100 motion-reduce:transition-none"
@@ -40,11 +77,13 @@ function HeroButton({
                 />
             </span>
             {label}
-        </Button>
+        </>
     );
 }
 
 export default function Welcome() {
+    const onlineOrderingActive = usePage().props.onlineOrderingActive;
+
     return (
         <>
             <Head title="Welcome" />
@@ -58,7 +97,7 @@ export default function Welcome() {
                         >
                             <h2
                                 id="menu-heading"
-                                className="text-center font-heading text-4xl tracking-normal text-primary uppercase sm:text-4xl font-semibold"
+                                className="text-center font-heading text-4xl font-semibold tracking-normal text-primary uppercase sm:text-4xl"
                             >
                                 Menu
                             </h2>
@@ -66,11 +105,19 @@ export default function Welcome() {
                                 <HeroButton
                                     icon={UtensilsCrossed}
                                     label="Dine in"
+                                    href="/menu/dine-in"
                                     className="sm:flex-1 sm:px-6"
                                 />
                                 <HeroButton
                                     icon={Bike}
                                     label="Delivery"
+                                    href="/menu/delivery"
+                                    disabled={!onlineOrderingActive}
+                                    title={
+                                        onlineOrderingActive
+                                            ? undefined
+                                            : 'Delivery is currently unavailable'
+                                    }
                                     className="sm:flex-1 sm:px-6"
                                 />
                             </div>

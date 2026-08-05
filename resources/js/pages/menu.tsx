@@ -1,0 +1,156 @@
+import { Head } from '@inertiajs/react';
+import { useEffect, useMemo, useState } from 'react';
+import { CategoryGrid } from '@/components/menu/category-grid';
+import { FilterPills } from '@/components/menu/filter-pills';
+import { MenuSlider } from '@/components/menu/menu-slider';
+import { OrderTypeSwitch } from '@/components/menu/order-type-switch';
+import { ProductCard } from '@/components/menu/product-card';
+import { SiteBanner } from '@/components/menu/site-banner';
+import { SiteFooter } from '@/components/menu/site-footer';
+import { SiteHeader } from '@/components/menu/site-header';
+import { WhatsAppFab } from '@/components/menu/whatsapp-fab';
+import type { Category, OrderType, Slide } from '@/types';
+
+interface MenuProps {
+    orderType: OrderType;
+    orderTypeLabel: string;
+    categories: Category[];
+    slides: Slide[];
+}
+
+/** The category whose slug is in `?category=`, or null for the boxes view. */
+function readCategoryFromUrl(categories: Category[]): number | null {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    const slug = new URLSearchParams(window.location.search).get('category');
+
+    if (slug === null) {
+        return null;
+    }
+
+    return categories.find((category) => category.slug === slug)?.id ?? null;
+}
+
+export default function Menu({
+    orderType,
+    orderTypeLabel,
+    categories,
+    slides,
+}: MenuProps) {
+    // Null shows the category boxes; a category id shows that category's items.
+    const [activeId, setActiveId] = useState<number | null>(() =>
+        readCategoryFromUrl(categories),
+    );
+
+    // Mirror the open category into the URL so the view survives a refresh and
+    // can be shared, without a server round-trip.
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        const slug =
+            activeId === null
+                ? null
+                : (categories.find((category) => category.id === activeId)
+                      ?.slug ?? null);
+
+        if (slug === null) {
+            url.searchParams.delete('category');
+        } else {
+            url.searchParams.set('category', slug);
+        }
+
+        window.history.replaceState(window.history.state, '', url);
+    }, [activeId, categories]);
+
+    const activeCategory = useMemo(
+        () => categories.find((category) => category.id === activeId) ?? null,
+        [activeId, categories],
+    );
+
+    const products = activeCategory?.products ?? [];
+
+    const selectCategory = (id: number): void => {
+        setActiveId(id);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    return (
+        <>
+            <Head title={`${orderTypeLabel} menu`} />
+
+            <div className="flex min-h-svh flex-col">
+                <SiteBanner />
+                <SiteHeader />
+
+                <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-10">
+                    <MenuSlider slides={slides} />
+
+                    <div className="flex items-center justify-between gap-3">
+                        <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-normal text-primary uppercase md:text-4xl">
+                            {orderTypeLabel}
+                        </h1>
+
+                        <OrderTypeSwitch current={orderType} />
+                    </div>
+
+                    {activeCategory === null ? (
+                        <CategoryGrid
+                            categories={categories}
+                            onSelect={(category) => setActiveId(category.id)}
+                        />
+                    ) : (
+                        <>
+                            <FilterPills
+                                categories={categories}
+                                activeId={activeCategory.id}
+                                onSelect={setActiveId}
+                                onClear={() => setActiveId(null)}
+                            />
+
+                            <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                                <h2 className="font-heading text-4xl font-semibold tracking-normal text-primary uppercase md:text-5xl">
+                                    {activeCategory.title}
+                                </h2>
+                                {products.length > 0 && (
+                                    <span className="text-xs tracking-[0.18em] text-primary/50 uppercase">
+                                        {products.length}{' '}
+                                        {products.length === 1
+                                            ? 'item'
+                                            : 'items'}
+                                    </span>
+                                )}
+                            </div>
+
+                            {products.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+                                    {products.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            addons={
+                                                activeCategory.addons ??
+                                                undefined
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="py-8 text-sm text-muted-foreground">
+                                    No items available.
+                                </p>
+                            )}
+                        </>
+                    )}
+                </main>
+
+                <SiteFooter
+                    categories={categories}
+                    onSelectCategory={selectCategory}
+                />
+            </div>
+
+            <WhatsAppFab />
+        </>
+    );
+}

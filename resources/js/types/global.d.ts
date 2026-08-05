@@ -1,4 +1,7 @@
 import type { Auth } from '@/types/auth';
+import type { Banner } from '@/types/banner';
+import type { Pricing } from '@/types/pricing';
+import type { Social } from '@/types/social';
 
 declare module 'react' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -12,6 +15,12 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            banner: Banner;
+            pricing: Pricing;
+            socials: Social[];
+            onlineOrderingActive: boolean;
+            whatsappNumber: string | null;
+            whatsappBadge: { show: boolean; number: string | null };
             sidebarOpen: boolean;
             [key: string]: unknown;
         };
