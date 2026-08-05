@@ -2,11 +2,15 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProductDialog } from '@/components/menu/product-dialog';
 import { SmartImage } from '@/components/smart-image';
+import type { CartAddon } from '@/contexts/cart-context';
+import { useCartActions } from '@/contexts/cart-context';
 import { cn, isArabic } from '@/lib/utils';
 import type { Slide } from '@/types';
 
 interface MenuSliderProps {
     slides: Slide[];
+    /** Whether a slide's details dialog can add to cart (delivery menu only). */
+    enableCart?: boolean;
 }
 
 const AUTOPLAY_DELAY = 5000;
@@ -17,7 +21,8 @@ const AUTOPLAY_DELAY = 5000;
  * A slide linked to a product opens that product's details when tapped; plain
  * slides are decorative.
  */
-export function MenuSlider({ slides }: MenuSliderProps) {
+export function MenuSlider({ slides, enableCart = false }: MenuSliderProps) {
+    const { addItem } = useCartActions();
     const trackRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [paused, setPaused] = useState(false);
@@ -116,6 +121,28 @@ export function MenuSlider({ slides }: MenuSliderProps) {
     };
 
     const product = activeSlide?.product ?? null;
+    const variants = product?.variants ?? [];
+    const selectedVariant = variants.length > 0 ? variants[variantIndex] : null;
+    const effectivePrice = selectedVariant
+        ? (selectedVariant.discount_price ?? selectedVariant.price)
+        : (product?.discount_price ?? product?.price ?? 0);
+
+    const addToCart = (selectedAddons: CartAddon[] = []): void => {
+        if (!product) {
+            return;
+        }
+
+        addItem({
+            productId: product.id,
+            variantIndex: variants.length > 0 ? variantIndex : null,
+            title: product.title,
+            variantName: selectedVariant?.name ?? null,
+            unitUsd: effectivePrice,
+            image: product.thumb ?? product.image,
+            addons: selectedAddons,
+        });
+        setActiveSlide(null);
+    };
 
     return (
         <section
@@ -232,6 +259,7 @@ export function MenuSlider({ slides }: MenuSliderProps) {
                     }}
                     selectedIndex={variantIndex}
                     onSelectVariant={setVariantIndex}
+                    onAddToCart={enableCart ? addToCart : undefined}
                 />
             )}
         </section>

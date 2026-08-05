@@ -90,6 +90,30 @@ it('withholds the orders number while the delivery menu is off', function (): vo
             ->where('whatsappNumber', null));
 });
 
+it('only charges delivery when it is on with a fee above zero', function (): void {
+    expect(settings(['charge_delivery' => false, 'delivery_fee' => 3])->deliveryFeeUsd())->toBeNull()
+        ->and(settings(['charge_delivery' => true, 'delivery_fee' => 0])->deliveryFeeUsd())->toBeNull()
+        ->and(settings(['charge_delivery' => true, 'delivery_fee' => null])->deliveryFeeUsd())->toBeNull()
+        ->and(settings(['charge_delivery' => true, 'delivery_fee' => 2.5])->deliveryFeeUsd())->toBe(2.5);
+});
+
+it('shares the delivery charge and the details asked for at checkout', function (): void {
+    settings([
+        'charge_delivery' => true,
+        'delivery_fee' => 2.5,
+        'require_full_name' => true,
+        'require_phone_number' => false,
+        'get_client_location' => true,
+    ]);
+
+    $this->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('pricing.deliveryFeeUsd', 2.5)
+            ->where('checkout.requireFullName', true)
+            ->where('checkout.requirePhoneNumber', false)
+            ->where('checkout.getClientLocation', true));
+});
+
 it('shares only the social links that name a known platform and a url', function (): void {
     settings([
         'social_links' => [

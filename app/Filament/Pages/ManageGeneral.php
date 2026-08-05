@@ -110,7 +110,7 @@ class ManageGeneral extends SettingsPage
 
                                 TextInput::make('whatsapp_number')
                                     ->label('Orders WhatsApp number')
-                                    ->helperText('Delivery enquiries are sent to this number. Include the country code, e.g. +9613000000.')
+                                    ->helperText('Orders are sent to this number. Include the country code, e.g. +9613000000.')
                                     ->tel()
                                     ->maxLength(255)
                                     ->requiredIf('online_ordering_active', true)
@@ -118,6 +118,49 @@ class ManageGeneral extends SettingsPage
                                     ->visibleJs(<<<'JS'
                                         $get('online_ordering_active')
                                         JS),
+
+                                Toggle::make('charge_delivery')
+                                    ->label('Charge for delivery')
+                                    ->helperText('Adds a delivery charge to the cart total on the delivery menu.')
+                                    ->default(false)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('online_ordering_active')
+                                        JS),
+
+                                TextInput::make('delivery_fee')
+                                    ->label('Delivery charge')
+                                    ->helperText('Amount in USD. Customers see it converted to their display currency.')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->prefix('$')
+                                    ->requiredIf('charge_delivery', true)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('online_ordering_active') && $get('charge_delivery')
+                                        JS),
+                            ]),
+
+                        Tab::make('Checkout')
+                            ->icon(Heroicon::OutlinedShoppingCart)
+                            ->schema([
+                                Toggle::make('require_full_name')
+                                    ->label('Require full name')
+                                    ->helperText('Ask for the customer\'s name before they can send the order.')
+                                    ->default(false)
+                                    ->columnSpanFull(),
+
+                                Toggle::make('require_phone_number')
+                                    ->label('Require phone number')
+                                    ->helperText('Ask for the customer\'s phone number before they can send the order.')
+                                    ->default(false)
+                                    ->columnSpanFull(),
+
+                                Toggle::make('get_client_location')
+                                    ->label('Ask for the customer\'s location')
+                                    ->helperText('Requests the browser location and attaches a map link to the order. If it can\'t be captured, the customer is asked to share it in the chat instead.')
+                                    ->default(false)
+                                    ->columnSpanFull(),
                             ]),
 
                         Tab::make('WhatsApp button')

@@ -1,10 +1,12 @@
-import { Star } from 'lucide-react';
+import { Plus, Star } from 'lucide-react';
 import { memo, useState } from 'react';
 import { DietIcons } from '@/components/menu/diet-icons';
 import { ProductDialog } from '@/components/menu/product-dialog';
 import { ProductPrice } from '@/components/menu/product-price';
 import { VariantSelector } from '@/components/menu/variant-selector';
 import { SmartImage } from '@/components/smart-image';
+import type { CartAddon } from '@/contexts/cart-context';
+import { useCartActions } from '@/contexts/cart-context';
 import { cn, isArabic } from '@/lib/utils';
 import type { CategoryAddon, Product } from '@/types';
 
@@ -12,14 +14,21 @@ interface ProductCardProps {
     product: Product;
     /** Add-ons from the product's category; empty when none are configured. */
     addons?: CategoryAddon[];
+    /** Whether add-to-cart actions are offered (the delivery menu only). */
+    enableCart?: boolean;
 }
 
 /**
  * A single menu item: thumbnail, name, short copy and price, with the variant
  * picker underneath when the item has options. Tapping anywhere opens the full
- * details dialog.
+ * details dialog; on the delivery menu a quick-add button sits alongside.
  */
-function ProductCardComponent({ product, addons = [] }: ProductCardProps) {
+function ProductCardComponent({
+    product,
+    addons = [],
+    enableCart = false,
+}: ProductCardProps) {
+    const { addItem } = useCartActions();
     const variants = product.variants ?? [];
     const hasVariants = variants.length > 0;
 
@@ -34,11 +43,37 @@ function ProductCardComponent({ product, addons = [] }: ProductCardProps) {
     const discountPrice = selectedVariant
         ? selectedVariant.discount_price
         : product.discount_price;
+    const effectivePrice = discountPrice ?? basePrice;
 
     const image = product.thumb ?? product.image;
 
     // Right-align and flip the text block to RTL when the title is Arabic.
     const rtl = isArabic(product.title);
+
+    const addToCart = (selectedAddons: CartAddon[] = []): void => {
+        addItem({
+            productId: product.id,
+            variantIndex: hasVariants ? selectedIndex : null,
+            title: product.title,
+            variantName: selectedVariant?.name ?? null,
+            unitUsd: effectivePrice,
+            image,
+            addons: selectedAddons,
+        });
+        setOpen(false);
+    };
+
+    // Quick add: when extras are on offer, open the dialog so they can be
+    // chosen rather than silently adding the item without them.
+    const handleQuickAdd = (): void => {
+        if (addons.length > 0) {
+            setOpen(true);
+
+            return;
+        }
+
+        addToCart();
+    };
 
     return (
         <>
@@ -110,11 +145,23 @@ function ProductCardComponent({ product, addons = [] }: ProductCardProps) {
                             </p>
                         )}
 
-                        <ProductPrice
-                            basePrice={basePrice}
-                            discountPrice={discountPrice}
-                            className="mt-auto pt-2"
-                        />
+                        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+                            <ProductPrice
+                                basePrice={basePrice}
+                                discountPrice={discountPrice}
+                            />
+
+                            {enableCart && (
+                                <button
+                                    type="button"
+                                    onClick={handleQuickAdd}
+                                    aria-label={`Add ${product.title} to cart`}
+                                    className="pointer-events-auto relative z-10 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    <Plus className="size-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -136,6 +183,7 @@ function ProductCardComponent({ product, addons = [] }: ProductCardProps) {
                 onOpenChange={setOpen}
                 selectedIndex={selectedIndex}
                 onSelectVariant={setSelectedIndex}
+                onAddToCart={enableCart ? addToCart : undefined}
             />
         </>
     );

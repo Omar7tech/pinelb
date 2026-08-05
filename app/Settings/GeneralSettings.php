@@ -46,6 +46,31 @@ class GeneralSettings extends Settings
     public ?string $whatsapp_number;
 
     /**
+     * Whether a delivery charge is added to the order total.
+     */
+    public bool $charge_delivery;
+
+    /**
+     * The delivery charge in USD, applied when {@see self::$charge_delivery} is on.
+     */
+    public ?float $delivery_fee;
+
+    /**
+     * Whether the customer must give their name before sending an order.
+     */
+    public bool $require_full_name;
+
+    /**
+     * Whether the customer must give their phone number before sending an order.
+     */
+    public bool $require_phone_number;
+
+    /**
+     * Whether the customer's location is requested and attached to the order.
+     */
+    public bool $get_client_location;
+
+    /**
      * Whether the floating WhatsApp chat button is shown on the storefront.
      */
     public bool $show_whatsapp_badge;
@@ -88,6 +113,17 @@ class GeneralSettings extends Settings
         $rate = (float) $this->lbp_exchange_rate;
 
         return $this->show_lbp_prices && $rate > 0 ? $rate : null;
+    }
+
+    /**
+     * The delivery charge to add to an order, or null when none applies —
+     * either the charge is off or no positive fee is configured.
+     */
+    public function deliveryFeeUsd(): ?float
+    {
+        $fee = (float) $this->delivery_fee;
+
+        return $this->charge_delivery && $fee > 0 ? $fee : null;
     }
 
     /**

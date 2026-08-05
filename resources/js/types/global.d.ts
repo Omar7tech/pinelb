@@ -1,5 +1,6 @@
 import type { Auth } from '@/types/auth';
 import type { Banner } from '@/types/banner';
+import type { Checkout } from '@/types/checkout';
 import type { Pricing } from '@/types/pricing';
 import type { Social } from '@/types/social';
 
@@ -17,6 +18,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             banner: Banner;
             pricing: Pricing;
+            checkout: Checkout;
             socials: Social[];
             onlineOrderingActive: boolean;
             whatsappNumber: string | null;

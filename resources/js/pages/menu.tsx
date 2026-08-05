@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
+import { CartSheet } from '@/components/menu/cart-sheet';
+import { CartToast } from '@/components/menu/cart-toast';
 import { CategoryGrid } from '@/components/menu/category-grid';
 import { FilterPills } from '@/components/menu/filter-pills';
 import { MenuSlider } from '@/components/menu/menu-slider';
@@ -9,6 +11,7 @@ import { SiteBanner } from '@/components/menu/site-banner';
 import { SiteFooter } from '@/components/menu/site-footer';
 import { SiteHeader } from '@/components/menu/site-header';
 import { WhatsAppFab } from '@/components/menu/whatsapp-fab';
+import { CartProvider } from '@/contexts/cart-context';
 import type { Category, OrderType, Slide } from '@/types';
 
 interface MenuProps {
@@ -75,16 +78,19 @@ export default function Menu({
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Ordering only exists on the delivery menu; dine-in stays read-only.
+    const cartEnabled = orderType === 'delivery';
+
     return (
-        <>
+        <CartProvider>
             <Head title={`${orderTypeLabel} menu`} />
 
             <div className="flex min-h-svh flex-col">
                 <SiteBanner />
-                <SiteHeader />
+                <SiteHeader showCart={cartEnabled} />
 
                 <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-10">
-                    <MenuSlider slides={slides} />
+                    <MenuSlider slides={slides} enableCart={cartEnabled} />
 
                     <div className="flex items-center justify-between gap-3">
                         <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-normal text-primary uppercase md:text-4xl">
@@ -132,6 +138,7 @@ export default function Menu({
                                                 activeCategory.addons ??
                                                 undefined
                                             }
+                                            enableCart={cartEnabled}
                                         />
                                     ))}
                                 </div>
@@ -150,7 +157,10 @@ export default function Menu({
                 />
             </div>
 
+            {cartEnabled && <CartSheet />}
+            {cartEnabled && <CartToast />}
+
             <WhatsAppFab />
-        </>
+        </CartProvider>
     );
 }

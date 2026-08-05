@@ -52,6 +52,13 @@ class HandleInertiaRequests extends Middleware
             'pricing' => [
                 'display' => $settings->resolvedPriceDisplay()->value,
                 'lbpRate' => $settings->usableLbpRate(),
+                'deliveryFeeUsd' => $settings->deliveryFeeUsd(),
+            ],
+            // What the customer has to provide before an order can be sent.
+            'checkout' => [
+                'requireFullName' => $settings->require_full_name,
+                'requirePhoneNumber' => $settings->require_phone_number,
+                'getClientLocation' => $settings->get_client_location,
             ],
             // Whether the delivery menu is available; when off the storefront is
             // dine-in only and the delivery route redirects back to dine-in.
