@@ -124,19 +124,9 @@ export default function Menu({
                                 onClear={() => setActiveId(null)}
                             />
 
-                            <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                                <h2 className="font-heading text-4xl font-semibold tracking-normal text-primary uppercase md:text-5xl">
-                                    {activeCategory.title}
-                                </h2>
-                                {products.length > 0 && (
-                                    <span className="text-xs tracking-[0.18em] text-primary/50 uppercase">
-                                        {products.length}{' '}
-                                        {products.length === 1
-                                            ? 'item'
-                                            : 'items'}
-                                    </span>
-                                )}
-                            </div>
+                            <h2 className="mt-2 font-heading text-4xl font-semibold tracking-normal text-primary uppercase md:text-5xl">
+                                {activeCategory.title}
+                            </h2>
 
                             {products.length > 0 ? (
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">

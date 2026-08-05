@@ -12,8 +12,6 @@ interface CategoryCardProps {
  * panel. Hovering lifts the box and fills it with sage, inverting the label.
  */
 export function CategoryCard({ category, onSelect }: CategoryCardProps) {
-    const itemCount = category.products?.length ?? 0;
-
     return (
         <button
             type="button"
@@ -29,26 +27,22 @@ export function CategoryCard({ category, onSelect }: CategoryCardProps) {
             <ArrowUpRight className="absolute top-3 right-3 size-4 text-primary/30 transition-colors duration-300 group-hover:text-primary-foreground/60" />
 
             {category.image ? (
+                /* Category art is cut out on a transparent background, so the
+                   image sits whole inside its box rather than being cropped to
+                   a circle. */
                 <SmartImage
                     src={category.image}
                     alt={category.title}
-                    className="aspect-square w-3/5 max-w-32 rounded-full"
-                    imgClassName="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="aspect-square w-3/5 max-w-32"
+                    imgClassName="object-contain transition-transform duration-300 group-hover:scale-105"
                     draggable={false}
                 />
             ) : (
-                <span className="aspect-square w-3/5 max-w-32 rounded-full bg-primary/10 transition-colors duration-300 group-hover:bg-primary-foreground/15" />
+                <span className="aspect-square w-3/5 max-w-32 rounded-xl bg-primary/10 transition-colors duration-300 group-hover:bg-primary-foreground/15" />
             )}
 
-            <span className="flex flex-col items-center gap-0.5">
-                <span className="line-clamp-2 text-center font-heading text-lg leading-tight font-semibold tracking-normal uppercase transition-colors duration-300 group-hover:text-primary-foreground sm:text-xl">
-                    {category.title}
-                </span>
-                {itemCount > 0 && (
-                    <span className="text-[10px] tracking-[0.18em] text-primary/50 uppercase transition-colors duration-300 group-hover:text-primary-foreground/60">
-                        {itemCount} {itemCount === 1 ? 'item' : 'items'}
-                    </span>
-                )}
+            <span className="line-clamp-2 text-center font-heading text-lg leading-tight font-semibold tracking-normal uppercase transition-colors duration-300 group-hover:text-primary-foreground sm:text-xl">
+                {category.title}
             </span>
         </button>
     );
