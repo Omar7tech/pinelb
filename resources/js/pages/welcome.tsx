@@ -50,7 +50,7 @@ export default function Welcome() {
             <Head title="Welcome" />
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
-                    <PineLogo className="w-full max-w-sm select-none" />
+                    <PineLogo className="w-full max-w-xs select-none sm:max-w-sm" />
                     <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-4 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:max-w-md">
                         <section
                             aria-labelledby="menu-heading"
