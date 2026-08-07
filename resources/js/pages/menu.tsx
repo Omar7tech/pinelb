@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CartSheet } from '@/components/menu/cart-sheet';
 import { CartToast } from '@/components/menu/cart-toast';
 import { CategoryGrid } from '@/components/menu/category-grid';
+import { CategoryTitle } from '@/components/menu/category-title';
 import { FilterPills } from '@/components/menu/filter-pills';
 import { MenuSlider } from '@/components/menu/menu-slider';
 import { OrderTypeSwitch } from '@/components/menu/order-type-switch';
@@ -126,9 +127,7 @@ export default function Menu({
                                 onClear={() => setActiveId(null)}
                             />
 
-                            <h2 className="mt-2 font-heading text-4xl font-semibold tracking-normal text-primary uppercase md:text-5xl">
-                                {activeCategory.title}
-                            </h2>
+                            <CategoryTitle title={activeCategory.title} />
 
                             {products.length > 0 ? (
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
