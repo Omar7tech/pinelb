@@ -1,5 +1,6 @@
+import useEmblaCarousel from 'embla-carousel-react';
 import { LayoutGrid } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/types';
 
@@ -10,54 +11,6 @@ interface FilterPillsProps {
     onSelect: (id: number) => void;
     /** Returns to the category boxes. */
     onClear: () => void;
-}
-
-/**
- * Tracks which horizontal edges of the row still hide content, so whichever
- * side can scroll gets a fade — a "there's more" cue on narrow screens.
- */
-function useScrollEdges(deps: unknown): {
-    scrollRef: React.RefObject<HTMLDivElement | null>;
-    edges: { start: boolean; end: boolean };
-} {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [edges, setEdges] = useState({ start: false, end: false });
-
-    const updateEdges = useCallback((): void => {
-        const element = scrollRef.current;
-
-        if (!element) {
-            return;
-        }
-
-        const max = element.scrollWidth - element.clientWidth;
-
-        setEdges({
-            start: element.scrollLeft > 1,
-            end: element.scrollLeft < max - 1,
-        });
-    }, []);
-
-    useEffect(() => {
-        const element = scrollRef.current;
-
-        if (!element) {
-            return;
-        }
-
-        updateEdges();
-        element.addEventListener('scroll', updateEdges, { passive: true });
-
-        const observer = new ResizeObserver(updateEdges);
-        observer.observe(element);
-
-        return () => {
-            element.removeEventListener('scroll', updateEdges);
-            observer.disconnect();
-        };
-    }, [updateEdges, deps]);
-
-    return { scrollRef, edges };
 }
 
 /** The CSS mask that fades whichever edges of the row are still scrollable. */
@@ -83,6 +36,10 @@ function edgeMask(edges: { start: boolean; end: boolean }): string | undefined {
  * The category filter row shown once a category is open: an "all categories"
  * pill that returns to the boxes, then one pill per category. Selecting a pill
  * swaps the products client-side.
+ *
+ * The row is an Embla carousel in free-drag mode, so it can be dragged with a
+ * mouse as well as a finger. Whichever edge still hides pills gets a fade — a
+ * "there's more" cue on narrow screens.
  */
 export function FilterPills({
     categories,
@@ -90,7 +47,65 @@ export function FilterPills({
     onSelect,
     onClear,
 }: FilterPillsProps) {
-    const { scrollRef, edges } = useScrollEdges(categories);
+    const [emblaRef, emblaApi] = useEmblaCarousel({
+        dragFree: true,
+        align: 'start',
+        containScroll: 'trimSnaps',
+    });
+
+    const [edges, setEdges] = useState({ start: false, end: false });
+
+    // Mirror how far the row can still travel into the edge fades.
+    useEffect(() => {
+        if (!emblaApi) {
+            return;
+        }
+
+        const sync = (): void => {
+            setEdges({
+                start: emblaApi.canScrollPrev(),
+                end: emblaApi.canScrollNext(),
+            });
+        };
+
+        emblaApi.on('scroll', sync);
+        emblaApi.on('settle', sync);
+        emblaApi.on('reInit', sync);
+        // Embla is imperative; read its initial position once on mount.
+        sync();
+
+        return () => {
+            emblaApi.off('scroll', sync);
+            emblaApi.off('settle', sync);
+            emblaApi.off('reInit', sync);
+        };
+    }, [emblaApi, categories]);
+
+    /** Bring a pill into view when it's off-screen, e.g. once it's selected. */
+    const revealPill = (index: number): void => {
+        if (!emblaApi || emblaApi.slidesInView().includes(index)) {
+            return;
+        }
+
+        emblaApi.scrollTo(index);
+    };
+
+    // Follow the selection, which can also be changed from the footer links.
+    useEffect(() => {
+        if (!emblaApi) {
+            return;
+        }
+
+        const index = categories.findIndex(
+            (category) => category.id === activeId,
+        );
+
+        if (index === -1 || emblaApi.slidesInView().includes(index)) {
+            return;
+        }
+
+        emblaApi.scrollTo(index);
+    }, [emblaApi, categories, activeId]);
 
     return (
         <div className="flex items-center gap-2">
@@ -104,33 +119,40 @@ export function FilterPills({
             </button>
 
             <div
-                ref={scrollRef}
+                ref={emblaRef}
                 style={{
                     maskImage: edgeMask(edges),
                     WebkitMaskImage: edgeMask(edges),
                 }}
-                className="flex min-w-0 flex-1 snap-x snap-mandatory [scrollbar-width:none] gap-2 overflow-x-auto scroll-smooth py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                className="min-w-0 flex-1 overflow-hidden py-1 select-none"
             >
-                {categories.map((category) => {
-                    const active = category.id === activeId;
+                <div className="-ml-2 flex">
+                    {categories.map((category, index) => {
+                        const active = category.id === activeId;
 
-                    return (
-                        <button
-                            key={category.id}
-                            type="button"
-                            onClick={() => onSelect(category.id)}
-                            aria-pressed={active}
-                            className={cn(
-                                'shrink-0 snap-start rounded-full border px-4 py-2 text-sm tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-                                active
-                                    ? 'border-primary bg-primary text-primary-foreground'
-                                    : 'border-primary/20 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10',
-                            )}
-                        >
-                            {category.title}
-                        </button>
-                    );
-                })}
+                        return (
+                            <div key={category.id} className="shrink-0 pl-2">
+                                <button
+                                    type="button"
+                                    onClick={() => onSelect(category.id)}
+                                    // Tabbing to a clipped pill would scroll the
+                                    // viewport out from under Embla, so move the
+                                    // row itself instead.
+                                    onFocus={() => revealPill(index)}
+                                    aria-pressed={active}
+                                    className={cn(
+                                        'cursor-pointer rounded-full border px-4 py-2 text-sm tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                                        active
+                                            ? 'border-primary bg-primary text-primary-foreground'
+                                            : 'border-primary/20 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10',
+                                    )}
+                                >
+                                    {category.title}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
