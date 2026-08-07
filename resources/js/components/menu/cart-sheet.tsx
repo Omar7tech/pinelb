@@ -19,6 +19,7 @@ import {
 import { useCart } from '@/contexts/cart-context';
 import { useCheckout } from '@/hooks/use-checkout';
 import { usePricing } from '@/hooks/use-pricing';
+import { nextOpeningLabel, useShop } from '@/lib/shop';
 
 /** The heading shown for each step of the flow. */
 const STEP_TITLES = {
@@ -49,6 +50,9 @@ export function CartSheet() {
         clear,
     } = useCart();
     const pricing = usePricing();
+    const shop = useShop();
+    // When the shop is closed, tell the customer when it opens again.
+    const opensLabel = nextOpeningLabel(shop);
 
     // Delivery is only charged when there is something to deliver.
     const deliveryFeeUsd = items.length > 0 ? pricing.deliveryFeeUsd : null;
@@ -211,10 +215,19 @@ export function CartSheet() {
                                         <ArrowRight className="size-4" />
                                     </button>
 
-                                    {!checkout.canSend && (
+                                    {!checkout.shopOpen ? (
                                         <p className="text-center text-xs text-muted-foreground">
-                                            Ordering is unavailable right now.
+                                            We&rsquo;re closed right now, so
+                                            orders can&rsquo;t be sent.
+                                            {opensLabel && ` ${opensLabel}.`}
                                         </p>
+                                    ) : (
+                                        !checkout.canSend && (
+                                            <p className="text-center text-xs text-muted-foreground">
+                                                Ordering is unavailable right
+                                                now.
+                                            </p>
+                                        )
                                     )}
 
                                     <button

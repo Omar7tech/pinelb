@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import { ShopHours } from '@/components/menu/shop-hours';
 import { Treeline } from '@/components/treeline';
 import type { Category } from '@/types';
 
@@ -41,6 +42,8 @@ export function SiteFooter({ categories, onSelectCategory }: SiteFooterProps) {
                             </ul>
                         </nav>
                     )}
+
+                    <ShopHours />
 
                     {socials.length > 0 && (
                         <nav>

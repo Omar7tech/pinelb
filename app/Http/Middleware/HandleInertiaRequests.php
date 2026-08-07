@@ -49,6 +49,15 @@ class HandleInertiaRequests extends Middleware
                 'show' => $settings->show_banner && filled($settings->banner_text),
                 'text' => $settings->banner_text,
             ],
+            'shop' => [
+                // The authoritative open/closed snapshot for this request, used
+                // for the first render; the client recomputes it live while the
+                // shop runs on the automatic schedule.
+                'isOpen' => $settings->isCurrentlyOpen(),
+                'statusMode' => $settings->status_mode->value,
+                'isManuallyOpen' => $settings->is_open,
+                'openingHours' => $this->openingHours($settings),
+            ],
             'pricing' => [
                 'display' => $settings->resolvedPriceDisplay()->value,
                 'lbpRate' => $settings->usableLbpRate(),
@@ -70,6 +79,32 @@ class HandleInertiaRequests extends Middleware
             ],
             'socials' => $this->socialLinks($settings),
         ];
+    }
+
+    /**
+     * The weekly schedule in the shape the storefront reads, dropping any entry
+     * that isn't a complete day so a malformed row can't break the menu.
+     *
+     * @return array<int, array{day: int, isClosed: bool, opensAt: string, closesAt: string}>
+     */
+    private function openingHours(GeneralSettings $settings): array
+    {
+        return collect($settings->opening_hours)
+            ->map(function (mixed $hours): ?array {
+                if (! is_array($hours) || ! isset($hours['day'], $hours['opens_at'], $hours['closes_at'])) {
+                    return null;
+                }
+
+                return [
+                    'day' => (int) $hours['day'],
+                    'isClosed' => (bool) ($hours['is_closed'] ?? false),
+                    'opensAt' => (string) $hours['opens_at'],
+                    'closesAt' => (string) $hours['closes_at'],
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**

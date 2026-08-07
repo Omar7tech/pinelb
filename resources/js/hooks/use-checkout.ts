@@ -4,6 +4,7 @@ import type { CartItem } from '@/contexts/cart-context';
 import type { PriceParts } from '@/hooks/use-pricing';
 import { getBestLocation, isPermissionDenied } from '@/lib/geolocation';
 import type { LocationResult } from '@/lib/geolocation';
+import { useShopOpen } from '@/lib/shop';
 import { buildWhatsAppUrl } from '@/lib/whatsapp';
 import { buildOrderMessage } from '@/lib/whatsapp-order';
 
@@ -70,6 +71,8 @@ export function useCheckout({
 }: CheckoutInput) {
     const { whatsappNumber, checkout } = usePage().props;
     const { requireFullName, requirePhoneNumber, getClientLocation } = checkout;
+    // Orders can only be sent while the shop is open.
+    const shopOpen = useShopOpen();
 
     const [step, setStep] = useState<CheckoutStep>('cart');
     const [name, setName] = useState(() => readStored(NAME_STORAGE_KEY));
@@ -86,7 +89,7 @@ export function useCheckout({
     // resolves just after the customer chose to send without it.
     const sentRef = useRef(false);
 
-    const canSend = whatsappNumber !== null && items.length > 0;
+    const canSend = whatsappNumber !== null && items.length > 0 && shopOpen;
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
     const detailsValid =
@@ -108,7 +111,9 @@ export function useCheckout({
             if (
                 sentRef.current ||
                 whatsappNumber === null ||
-                items.length === 0
+                items.length === 0 ||
+                // The shop may have closed part-way through the flow.
+                !shopOpen
             ) {
                 return;
             }
@@ -142,6 +147,7 @@ export function useCheckout({
         },
         [
             whatsappNumber,
+            shopOpen,
             items,
             pricing,
             subtotalUsd,
@@ -236,6 +242,7 @@ export function useCheckout({
         step,
         requireFullName,
         requirePhoneNumber,
+        shopOpen,
         canSend,
         detailsValid,
         locationDenied,

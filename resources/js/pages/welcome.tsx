@@ -4,6 +4,7 @@ import { Bike, CalendarCheck, UtensilsCrossed } from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
+import { nextOpeningLabel, useShop, useShopOpen } from '@/lib/shop';
 import { cn } from '@/lib/utils';
 
 /**
@@ -83,6 +84,9 @@ function HeroButtonBody({
 
 export default function Welcome() {
     const onlineOrderingActive = usePage().props.onlineOrderingActive;
+    const shop = useShop();
+    const shopOpen = useShopOpen();
+    const opensLabel = nextOpeningLabel(shop);
 
     return (
         <>
@@ -121,6 +125,17 @@ export default function Welcome() {
                                     className="sm:flex-1 sm:px-6"
                                 />
                             </div>
+
+                            {!shopOpen && (
+                                <p className="mt-4 text-center text-[11px] tracking-[0.16em] text-primary/60 uppercase">
+                                    We&rsquo;re closed right now
+                                    {opensLabel && (
+                                        <span className="block tracking-normal normal-case">
+                                            {opensLabel}
+                                        </span>
+                                    )}
+                                </p>
+                            )}
                         </section>
                         <HeroButton
                             icon={CalendarCheck}

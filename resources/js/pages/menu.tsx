@@ -7,6 +7,7 @@ import { FilterPills } from '@/components/menu/filter-pills';
 import { MenuSlider } from '@/components/menu/menu-slider';
 import { OrderTypeSwitch } from '@/components/menu/order-type-switch';
 import { ProductCard } from '@/components/menu/product-card';
+import { ShopClosedNotice } from '@/components/menu/shop-closed-notice';
 import { SiteBanner } from '@/components/menu/site-banner';
 import { SiteFooter } from '@/components/menu/site-footer';
 import { SiteHeader } from '@/components/menu/site-header';
@@ -88,6 +89,7 @@ export default function Menu({
             <div className="flex min-h-svh flex-col">
                 <SiteBanner />
                 <SiteHeader showCart={cartEnabled} />
+                <ShopClosedNotice />
 
                 <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-10">
                     <MenuSlider slides={slides} enableCart={cartEnabled} />

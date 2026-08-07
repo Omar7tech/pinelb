@@ -2,6 +2,7 @@ import type { Auth } from '@/types/auth';
 import type { Banner } from '@/types/banner';
 import type { Checkout } from '@/types/checkout';
 import type { Pricing } from '@/types/pricing';
+import type { Shop } from '@/types/shop';
 import type { Social } from '@/types/social';
 
 declare module 'react' {
@@ -17,6 +18,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             banner: Banner;
+            shop: Shop;
             pricing: Pricing;
             checkout: Checkout;
             socials: Social[];

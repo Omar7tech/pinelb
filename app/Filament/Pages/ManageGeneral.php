@@ -3,13 +3,17 @@
 namespace App\Filament\Pages;
 
 use App\Enums\PriceDisplay;
+use App\Enums\ShopStatusMode;
 use App\Enums\SocialPlatform;
+use App\Enums\Weekday;
 use App\Settings\GeneralSettings;
 use BackedEnum;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
@@ -36,6 +40,70 @@ class ManageGeneral extends SettingsPage
                 Tabs::make()
                     ->columnSpanFull()
                     ->tabs([
+                        Tab::make('Shop status')
+                            ->icon(Heroicon::OutlinedBuildingStorefront)
+                            ->schema([
+                                Radio::make('status_mode')
+                                    ->label('Status mode')
+                                    ->helperText('How the storefront decides whether the shop is open.')
+                                    ->options(ShopStatusMode::class)
+                                    ->default(ShopStatusMode::MANUAL->value)
+                                    ->required()
+                                    ->columnSpanFull(),
+
+                                Toggle::make('is_open')
+                                    ->label('Shop is open')
+                                    ->helperText('Turn off to close the shop. Customers can still browse the menu, but they can\'t send an order.')
+                                    ->default(true)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('status_mode') === 'manual'
+                                        JS),
+
+                                Repeater::make('opening_hours')
+                                    ->label('Weekly opening hours')
+                                    ->helperText('The shop opens and closes automatically on these hours. A closing time earlier than the opening time means it closes after midnight.')
+                                    ->default(GeneralSettings::defaultOpeningHours())
+                                    ->addable(false)
+                                    ->deletable(false)
+                                    ->reorderable(false)
+                                    ->columnSpanFull()
+                                    ->itemLabel(fn (array $state): ?string => Weekday::tryFrom($state['day'] ?? -1)?->getLabel())
+                                    ->schema([
+                                        Hidden::make('day'),
+
+                                        Toggle::make('is_closed')
+                                            ->label('Closed all day')
+                                            ->default(false)
+                                            ->columnSpanFull(),
+
+                                        TimePicker::make('opens_at')
+                                            ->label('Opens at')
+                                            ->validationAttribute('opening time')
+                                            ->seconds(false)
+                                            ->default('09:00')
+                                            ->required()
+                                            ->columnSpanFull()
+                                            ->visibleJs(<<<'JS'
+                                                ! $get('is_closed')
+                                                JS),
+
+                                        TimePicker::make('closes_at')
+                                            ->label('Closes at')
+                                            ->validationAttribute('closing time')
+                                            ->seconds(false)
+                                            ->default('17:00')
+                                            ->required()
+                                            ->columnSpanFull()
+                                            ->visibleJs(<<<'JS'
+                                                ! $get('is_closed')
+                                                JS),
+                                    ])
+                                    ->visibleJs(<<<'JS'
+                                        $get('status_mode') === 'automatic'
+                                        JS),
+                            ]),
+
                         Tab::make('Banner')
                             ->icon(Heroicon::OutlinedMegaphone)
                             ->schema([
