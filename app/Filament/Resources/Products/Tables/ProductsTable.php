@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Products\Tables;
 
 use App\Enums\OrderType;
+use App\Filament\Tables\Columns\PriceColumn;
 use App\Models\Product;
+use App\Settings\GeneralSettings;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,12 +17,14 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Number;
 
 class ProductsTable
 {
     public static function configure(Table $table): Table
     {
+        // Null hides the LBP line, matching the storefront's fallback to USD.
+        $lbpRate = app(GeneralSettings::class)->usableLbpRate();
+
         return $table
             ->reorderable('sort_order')
             ->defaultSort('sort_order')
@@ -40,12 +44,10 @@ class ProductsTable
                     ->badge()
                     ->color('info')
                     ->sortable(),
-                TextColumn::make('price')
-                    ->money('USD')
-                    ->description(fn (Product $record): ?string => $record->discount_price === null
-                        ? null
-                        : 'Sale: '.Number::currency((float) $record->discount_price, 'USD'))
-                    ->sortable(),
+                PriceColumn::make('price')
+                    ->label('Price')
+                    ->sortable()
+                    ->lbpRate($lbpRate),
                 TextColumn::make('order_type')
                     ->label('Order type')
                     ->badge()

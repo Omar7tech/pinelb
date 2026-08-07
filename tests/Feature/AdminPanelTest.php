@@ -11,6 +11,7 @@ use App\Filament\Resources\Products\Pages\ViewProduct;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use App\Settings\GeneralSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -45,6 +46,30 @@ it('renders category pages', function (string $page): void {
         ? []
         : ['record' => $this->category->getRouteKey()])->assertOk();
 })->with([ListCategories::class, CreateCategory::class, ViewCategory::class, EditCategory::class]);
+
+it('lists a product price with its sale price and the LBP conversion', function (): void {
+    $settings = app(GeneralSettings::class);
+    $settings->show_lbp_prices = true;
+    $settings->lbp_exchange_rate = 90000;
+    $settings->save();
+
+    // The LBP line follows the effective price: 4.50 × 90,000 = 405,000.
+    Livewire::test(ListProducts::class)
+        ->assertSeeText('$5.50')
+        ->assertSeeText('$4.50')
+        ->assertSeeText('405,000 LBP');
+});
+
+it('lists a product price without LBP while LBP pricing is off', function (): void {
+    $settings = app(GeneralSettings::class);
+    $settings->show_lbp_prices = false;
+    $settings->lbp_exchange_rate = 90000;
+    $settings->save();
+
+    Livewire::test(ListProducts::class)
+        ->assertSeeText('$5.50')
+        ->assertDontSeeText('LBP');
+});
 
 it('creates and edits a product through the form', function (): void {
     Livewire::test(CreateProduct::class)
