@@ -124,14 +124,27 @@ export function FilterPills({
                     maskImage: edgeMask(edges),
                     WebkitMaskImage: edgeMask(edges),
                 }}
-                className="min-w-0 flex-1 overflow-hidden py-1 select-none"
+                // Pull the row through the page gutter so pills run off the
+                // screen edge rather than being cut short inside it.
+                className="-mr-4 min-w-0 flex-1 overflow-hidden py-1 select-none md:-mr-10"
             >
                 <div className="-ml-2 flex">
                     {categories.map((category, index) => {
                         const active = category.id === activeId;
 
                         return (
-                            <div key={category.id} className="shrink-0 pl-2">
+                            <div
+                                key={category.id}
+                                className={cn(
+                                    'shrink-0 pl-2',
+                                    // The gutter has to sit inside the last
+                                    // slide: Embla measures its scroll limit
+                                    // from the slides, so padding on the track
+                                    // would never be reachable.
+                                    index === categories.length - 1 &&
+                                        'pr-4 md:pr-10',
+                                )}
+                            >
                                 <button
                                     type="button"
                                     onClick={() => onSelect(category.id)}
