@@ -139,7 +139,7 @@ export default function Welcome() {
                         </section>
                         <HeroButton
                             icon={CalendarCheck}
-                            label="Reserve your spot"
+                            label="حجوز قعدتك"
                             className="self-center sm:w-auto"
                         />
                     </div>
