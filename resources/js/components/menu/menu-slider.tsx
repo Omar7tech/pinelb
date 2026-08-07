@@ -74,11 +74,14 @@ export function MenuSlider({ slides, enableCart = false }: MenuSliderProps) {
     }, [emblaApi]);
 
     // Autoplay would keep sliding underneath the details dialog, so hold it
-    // while a slide's product is open.
+    // while a slide's product is open. Embla's autoplay plugin skips its own
+    // setup when the slides fit in a single snap — three slides at a third of
+    // the width each on desktop — and calling play() on that uninitialised
+    // plugin throws, so only drive it once there is something to scroll.
     useEffect(() => {
         const autoplay = emblaApi?.plugins().autoplay;
 
-        if (!autoplay) {
+        if (!autoplay || snaps.length <= 1) {
             return;
         }
 
@@ -87,7 +90,7 @@ export function MenuSlider({ slides, enableCart = false }: MenuSliderProps) {
         } else {
             autoplay.stop();
         }
-    }, [emblaApi, activeSlide]);
+    }, [emblaApi, activeSlide, snaps.length]);
 
     if (slides.length === 0) {
         return null;
