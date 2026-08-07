@@ -16,9 +16,9 @@ export function CategoryCard({ category, onSelect }: CategoryCardProps) {
         <button
             type="button"
             onClick={() => onSelect(category)}
-            className="group relative flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-[1.5rem] border border-primary bg-primary p-3 text-primary-foreground transition-transform duration-300 ease-out hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+            className="group relative flex aspect-square flex-col items-center justify-center gap-1.5 overflow-hidden rounded-2xl border border-primary bg-primary p-2 text-primary-foreground transition-transform duration-300 ease-out hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:gap-2 sm:rounded-[1.5rem] sm:p-3"
         >
-            <ArrowUpRight className="absolute top-3 right-3 size-4 text-primary-foreground/50" />
+            <ArrowUpRight className="absolute top-2 right-2 size-3.5 text-primary-foreground/50 sm:top-3 sm:right-3 sm:size-4" />
 
             {category.image ? (
                 /* Category art is cut out on a transparent background, so the
@@ -35,7 +35,7 @@ export function CategoryCard({ category, onSelect }: CategoryCardProps) {
                 <span className="aspect-square w-3/5 max-w-32 rounded-xl bg-primary-foreground/10" />
             )}
 
-            <span className="line-clamp-2 text-center font-heading text-lg leading-tight font-semibold tracking-normal uppercase sm:text-xl">
+            <span className="line-clamp-2 text-center font-heading text-xs leading-tight font-semibold tracking-normal uppercase sm:text-xl">
                 {category.title}
             </span>
         </button>
