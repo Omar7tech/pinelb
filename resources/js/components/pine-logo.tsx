@@ -87,6 +87,26 @@ const WORDMARK_START_MS = 430;
 const WORDMARK_STEP_MS = 50;
 const TAGLINE_START_MS = 660;
 
+/**
+ * Just the pine mark, cropped to the tree and drawn static. Used as a stand-in
+ * wherever an item has no picture of its own.
+ */
+export function PineMark({ className }: { className?: string }) {
+    return (
+        <svg
+            viewBox="-1 0 89 128"
+            role="img"
+            aria-label="Pine"
+            fill="currentColor"
+            className={cn('text-primary', className)}
+        >
+            {MARK_PATHS.map(([d]) => (
+                <path key={d} d={d} />
+            ))}
+        </svg>
+    );
+}
+
 export function PineLogo({ className }: { className?: string }) {
     return (
         <svg

@@ -4,6 +4,7 @@ import { DietIcons } from '@/components/menu/diet-icons';
 import { ProductDialog } from '@/components/menu/product-dialog';
 import { ProductPrice } from '@/components/menu/product-price';
 import { VariantSelector } from '@/components/menu/variant-selector';
+import { PineMark } from '@/components/pine-logo';
 import { SmartImage } from '@/components/smart-image';
 import type { CartAddon } from '@/contexts/cart-context';
 import { useCartActions } from '@/contexts/cart-context';
@@ -89,7 +90,7 @@ function ProductCardComponent({
                 </button>
 
                 <div className="pointer-events-none flex min-w-0 flex-1 gap-3">
-                    {image && (
+                    {image ? (
                         <SmartImage
                             src={image}
                             alt={product.title}
@@ -97,6 +98,13 @@ function ProductCardComponent({
                             imgClassName="object-cover transition-transform duration-500 group-hover:scale-105"
                             draggable={false}
                         />
+                    ) : (
+                        <span
+                            aria-hidden
+                            className="grid size-24 shrink-0 place-items-center rounded-[1.15rem] bg-primary/5 md:size-28"
+                        >
+                            <PineMark className="h-3/5 w-auto text-primary/25 transition-transform duration-500 group-hover:scale-105" />
+                        </span>
                     )}
 
                     <div className="flex min-w-0 flex-1 flex-col">
