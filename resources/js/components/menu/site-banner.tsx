@@ -12,7 +12,7 @@ export function SiteBanner() {
     }
 
     return (
-        <div className="bg-primary text-primary-foreground">
+        <div className="bg-brick text-cream">
             <p className="mx-auto max-w-7xl px-4 py-2 text-center text-xs tracking-[0.18em] uppercase md:px-10 md:text-sm">
                 {banner.text}
             </p>
