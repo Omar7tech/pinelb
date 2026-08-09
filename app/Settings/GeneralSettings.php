@@ -107,6 +107,17 @@ class GeneralSettings extends Settings
     public ?string $whatsapp_badge_number;
 
     /**
+     * Whether spot reservations are offered. When off the landing page's
+     * reservation button is disabled and `/spots` redirects back home.
+     */
+    public bool $reservations_active;
+
+    /**
+     * The WhatsApp number reservation requests are sent to.
+     */
+    public ?string $reservation_phone_number;
+
+    /**
      * The social links shown in the storefront footer. Each entry is shaped
      * `['platform' => string, 'url' => string]`, and a platform appears once.
      *
@@ -214,6 +225,17 @@ class GeneralSettings extends Settings
         $fee = (float) $this->delivery_fee;
 
         return $this->charge_delivery && $fee > 0 ? $fee : null;
+    }
+
+    /**
+     * The number reservation requests are sent to, or null when reservations
+     * can't be taken — either they're switched off or no number is configured.
+     */
+    public function usableReservationPhoneNumber(): ?string
+    {
+        return $this->reservations_active && filled($this->reservation_phone_number)
+            ? $this->reservation_phone_number
+            : null;
     }
 
     /**

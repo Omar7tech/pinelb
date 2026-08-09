@@ -17,13 +17,9 @@ interface SpotCardProps {
  * the action for a "reserved" notice.
  */
 function SpotCardComponent({ spot }: SpotCardProps) {
-    const { whatsappBadge, whatsappNumber } = usePage().props;
-
-    // Reservations are handled over chat: prefer the general contact number and
-    // fall back to the ordering one. With neither configured the card simply
+    // Reservations are handled over chat. Without a usable number the card just
     // shows its details, since there is nowhere to send the request.
-    const contactNumber =
-        (whatsappBadge?.show ? whatsappBadge.number : null) ?? whatsappNumber;
+    const contactNumber = usePage().props.reservations.phoneNumber;
 
     // Right-align and flip the text block to RTL when the name is Arabic.
     const rtl = isArabic(spot.name);

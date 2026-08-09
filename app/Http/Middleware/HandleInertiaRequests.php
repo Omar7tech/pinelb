@@ -72,6 +72,12 @@ class HandleInertiaRequests extends Middleware
             // Whether the delivery menu is available; when off the storefront is
             // dine-in only and the delivery route redirects back to dine-in.
             'onlineOrderingActive' => $settings->online_ordering_active,
+            // Whether spots can be booked; when off the landing page's
+            // reservation button is disabled and /spots redirects home.
+            'reservations' => [
+                'active' => $settings->reservations_active,
+                'phoneNumber' => $settings->usableReservationPhoneNumber(),
+            ],
             'whatsappNumber' => $settings->online_ordering_active ? $settings->whatsapp_number : null,
             'whatsappBadge' => [
                 'show' => $settings->show_whatsapp_badge && filled($settings->whatsapp_badge_number),

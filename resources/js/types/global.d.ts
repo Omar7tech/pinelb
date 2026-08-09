@@ -2,6 +2,7 @@ import type { Auth } from '@/types/auth';
 import type { Banner } from '@/types/banner';
 import type { Checkout } from '@/types/checkout';
 import type { Pricing } from '@/types/pricing';
+import type { Reservations } from '@/types/reservation';
 import type { Shop } from '@/types/shop';
 import type { Social } from '@/types/social';
 
@@ -23,6 +24,7 @@ declare module '@inertiajs/core' {
             checkout: Checkout;
             socials: Social[];
             onlineOrderingActive: boolean;
+            reservations: Reservations;
             whatsappNumber: string | null;
             whatsappBadge: { show: boolean; number: string | null };
             sidebarOpen: boolean;

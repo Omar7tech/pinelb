@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\ManageReservations;
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
 use App\Filament\Resources\Categories\Pages\ListCategories;
@@ -142,6 +143,36 @@ it('creates and edits a spot through the form', function (): void {
 
     expect(Spot::where('name', 'Fireplace table')->value('slug'))->toBe('fireplace-table')
         ->and($this->spot->fresh()->is_reserved)->toBeTrue();
+});
+
+it('saves the reservation settings without touching the rest', function (): void {
+    $settings = app(GeneralSettings::class);
+    $settings->banner_text = 'Welcome to Pine';
+    $settings->save();
+
+    Livewire::test(ManageReservations::class)
+        ->assertFormSet([
+            'reservations_active' => true,
+            'reservation_phone_number' => '+96171387946',
+        ])
+        ->fillForm(['reservation_phone_number' => '+9613000000'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $saved = app(GeneralSettings::class)->refresh();
+
+    expect($saved->reservation_phone_number)->toBe('+9613000000')
+        ->and($saved->banner_text)->toBe('Welcome to Pine');
+});
+
+it('requires a reservation number while reservations are enabled', function (): void {
+    Livewire::test(ManageReservations::class)
+        ->fillForm([
+            'reservations_active' => true,
+            'reservation_phone_number' => null,
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['reservation_phone_number']);
 });
 
 it('rejects a spot discount above its price', function (): void {

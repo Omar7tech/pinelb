@@ -1,12 +1,31 @@
 <?php
 
 use App\Models\Spot;
+use App\Settings\GeneralSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
+
+/**
+ * Apply the given values to the general settings and persist them.
+ *
+ * @param  array<string, mixed>  $values
+ */
+function reservationSettings(array $values): GeneralSettings
+{
+    $settings = app(GeneralSettings::class);
+
+    foreach ($values as $key => $value) {
+        $settings->{$key} = $value;
+    }
+
+    $settings->save();
+
+    return $settings;
+}
 
 it('renders the reservation page with its spots', function (): void {
     Spot::factory()->create([
@@ -66,6 +85,38 @@ it('sends the discount price when the spot is on offer', function (): void {
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('spots.0.price', 30)
             ->where('spots.0.discount_price', 15));
+});
+
+it('sends customers home while reservations are switched off', function (): void {
+    reservationSettings(['reservations_active' => false]);
+    Spot::factory()->create();
+
+    $this->get(route('spots.index'))->assertRedirect(route('home'));
+});
+
+it('shares the reservation number while reservations are on', function (): void {
+    reservationSettings([
+        'reservations_active' => true,
+        'reservation_phone_number' => '+96171387946',
+    ]);
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('reservations.active', true)
+            ->where('reservations.phoneNumber', '+96171387946'));
+});
+
+it('withholds the reservation number when none is configured', function (): void {
+    $settings = reservationSettings([
+        'reservations_active' => true,
+        'reservation_phone_number' => null,
+    ]);
+
+    expect($settings->usableReservationPhoneNumber())->toBeNull();
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('reservations.phoneNumber', null));
 });
 
 it('sends every gallery photo in upload order', function (): void {

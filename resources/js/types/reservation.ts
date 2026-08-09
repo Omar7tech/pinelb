@@ -19,3 +19,11 @@ export type Spot = {
     is_reserved: boolean;
     images: SpotImage[];
 };
+
+/** The reservation settings shared with every page. */
+export type Reservations = {
+    /** Whether spots can be booked at all. */
+    active: boolean;
+    /** Where requests are sent, or null when reservations can't be taken. */
+    phoneNumber: string | null;
+};

@@ -83,7 +83,7 @@ function HeroButtonBody({
 }
 
 export default function Welcome() {
-    const onlineOrderingActive = usePage().props.onlineOrderingActive;
+    const { onlineOrderingActive, reservations } = usePage().props;
     const shop = useShop();
     const shopOpen = useShopOpen();
     const opensLabel = nextOpeningLabel(shop);
@@ -141,6 +141,12 @@ export default function Welcome() {
                             icon={CalendarCheck}
                             label="حجوز قعدتك"
                             href="/spots"
+                            disabled={!reservations.active}
+                            title={
+                                reservations.active
+                                    ? undefined
+                                    : 'Reservations are currently unavailable'
+                            }
                             className="self-center border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto"
                         />
                     </div>
