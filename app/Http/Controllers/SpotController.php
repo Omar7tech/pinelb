@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SpotResource;
 use App\Models\Spot;
-use App\Settings\GeneralSettings;
+use App\Settings\ReservationSettings;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,11 +17,11 @@ class SpotController extends Controller
      * page so customers can see what the place offers — their card is just
      * marked as taken rather than bookable.
      */
-    public function index(GeneralSettings $settings): Response|RedirectResponse
+    public function index(ReservationSettings $settings): Response|RedirectResponse
     {
         // The page only exists while reservations are being taken; otherwise
         // send customers back to the landing page, matching the disabled button.
-        if (! $settings->reservations_active) {
+        if (! $settings->is_active) {
             return redirect()->route('home');
         }
 

@@ -18,6 +18,7 @@ use App\Models\Product;
 use App\Models\Spot;
 use App\Models\User;
 use App\Settings\GeneralSettings;
+use App\Settings\ReservationSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -145,34 +146,27 @@ it('creates and edits a spot through the form', function (): void {
         ->and($this->spot->fresh()->is_reserved)->toBeTrue();
 });
 
-it('saves the reservation settings without touching the rest', function (): void {
-    $settings = app(GeneralSettings::class);
-    $settings->banner_text = 'Welcome to Pine';
-    $settings->save();
-
+it('saves the reservation settings', function (): void {
     Livewire::test(ManageReservations::class)
         ->assertFormSet([
-            'reservations_active' => true,
-            'reservation_phone_number' => '+96171387946',
+            'is_active' => true,
+            'phone_number' => '+96171387946',
         ])
-        ->fillForm(['reservation_phone_number' => '+9613000000'])
+        ->fillForm(['phone_number' => '+9613000000'])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    $saved = app(GeneralSettings::class)->refresh();
-
-    expect($saved->reservation_phone_number)->toBe('+9613000000')
-        ->and($saved->banner_text)->toBe('Welcome to Pine');
+    expect(app(ReservationSettings::class)->refresh()->phone_number)->toBe('+9613000000');
 });
 
 it('requires a reservation number while reservations are enabled', function (): void {
     Livewire::test(ManageReservations::class)
         ->fillForm([
-            'reservations_active' => true,
-            'reservation_phone_number' => null,
+            'is_active' => true,
+            'phone_number' => null,
         ])
         ->call('save')
-        ->assertHasFormErrors(['reservation_phone_number']);
+        ->assertHasFormErrors(['phone_number']);
 });
 
 it('rejects a spot discount above its price', function (): void {

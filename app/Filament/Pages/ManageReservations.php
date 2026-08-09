@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Settings\GeneralSettings;
+use App\Settings\ReservationSettings;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,8 +14,6 @@ use UnitEnum;
 
 /**
  * The reservation settings, sitting under Spots in the Reservations group.
- * Only the reservation keys are in the form, so saving here leaves the rest of
- * the general settings untouched.
  */
 class ManageReservations extends SettingsPage
 {
@@ -29,7 +27,7 @@ class ManageReservations extends SettingsPage
 
     protected static ?int $navigationSort = 2;
 
-    protected static string $settings = GeneralSettings::class;
+    protected static string $settings = ReservationSettings::class;
 
     public function form(Schema $schema): Schema
     {
@@ -39,22 +37,22 @@ class ManageReservations extends SettingsPage
                     ->description('Controls the landing page\'s reservation button and the /spots page.')
                     ->columnSpanFull()
                     ->components([
-                        Toggle::make('reservations_active')
+                        Toggle::make('is_active')
                             ->label('Enable reservations')
                             ->helperText('Turn off to disable the reservation button. Customers sent to /spots are returned to the landing page.')
                             ->default(true)
                             ->columnSpanFull(),
 
-                        TextInput::make('reservation_phone_number')
+                        TextInput::make('phone_number')
                             ->label('Reservation phone number')
                             ->helperText('Reservation requests are sent to this number on WhatsApp. Include the country code, e.g. +96171387946.')
                             ->tel()
                             ->maxLength(255)
                             ->default('+96171387946')
-                            ->requiredIf('reservations_active', true)
+                            ->requiredIf('is_active', true)
                             ->columnSpanFull()
                             ->visibleJs(<<<'JS'
-                                $get('reservations_active')
+                                $get('is_active')
                                 JS),
                     ]),
             ]);

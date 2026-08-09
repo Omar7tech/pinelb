@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\SocialPlatform;
 use App\Settings\GeneralSettings;
+use App\Settings\ReservationSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -38,6 +39,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $settings = app(GeneralSettings::class);
+        $reservations = app(ReservationSettings::class);
 
         return [
             ...parent::share($request),
@@ -75,8 +77,8 @@ class HandleInertiaRequests extends Middleware
             // Whether spots can be booked; when off the landing page's
             // reservation button is disabled and /spots redirects home.
             'reservations' => [
-                'active' => $settings->reservations_active,
-                'phoneNumber' => $settings->usableReservationPhoneNumber(),
+                'active' => $reservations->is_active,
+                'phoneNumber' => $reservations->usablePhoneNumber(),
             ],
             'whatsappNumber' => $settings->online_ordering_active ? $settings->whatsapp_number : null,
             'whatsappBadge' => [

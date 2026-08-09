@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Spot;
-use App\Settings\GeneralSettings;
+use App\Settings\ReservationSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -10,13 +10,13 @@ use Inertia\Testing\AssertableInertia;
 uses(RefreshDatabase::class);
 
 /**
- * Apply the given values to the general settings and persist them.
+ * Apply the given values to the reservation settings and persist them.
  *
  * @param  array<string, mixed>  $values
  */
-function reservationSettings(array $values): GeneralSettings
+function reservationSettings(array $values): ReservationSettings
 {
-    $settings = app(GeneralSettings::class);
+    $settings = app(ReservationSettings::class);
 
     foreach ($values as $key => $value) {
         $settings->{$key} = $value;
@@ -88,7 +88,7 @@ it('sends the discount price when the spot is on offer', function (): void {
 });
 
 it('sends customers home while reservations are switched off', function (): void {
-    reservationSettings(['reservations_active' => false]);
+    reservationSettings(['is_active' => false]);
     Spot::factory()->create();
 
     $this->get(route('spots.index'))->assertRedirect(route('home'));
@@ -96,8 +96,8 @@ it('sends customers home while reservations are switched off', function (): void
 
 it('shares the reservation number while reservations are on', function (): void {
     reservationSettings([
-        'reservations_active' => true,
-        'reservation_phone_number' => '+96171387946',
+        'is_active' => true,
+        'phone_number' => '+96171387946',
     ]);
 
     $this->get(route('spots.index'))
@@ -108,11 +108,11 @@ it('shares the reservation number while reservations are on', function (): void 
 
 it('withholds the reservation number when none is configured', function (): void {
     $settings = reservationSettings([
-        'reservations_active' => true,
-        'reservation_phone_number' => null,
+        'is_active' => true,
+        'phone_number' => null,
     ]);
 
-    expect($settings->usableReservationPhoneNumber())->toBeNull();
+    expect($settings->usablePhoneNumber())->toBeNull();
 
     $this->get(route('spots.index'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
