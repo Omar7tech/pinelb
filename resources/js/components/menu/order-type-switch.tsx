@@ -24,7 +24,7 @@ interface OrderTypeSwitchProps {
 
 /**
  * Segmented toggle for moving between the dine-in and delivery menus. The two
- * options share an equal-width grid so a single sage pill can slide between
+ * options share an equal-width grid so a single brick pill can slide between
  * them instead of the labels flipping colour in place.
  */
 export function OrderTypeSwitch({ current }: OrderTypeSwitchProps) {
@@ -35,8 +35,8 @@ export function OrderTypeSwitch({ current }: OrderTypeSwitchProps) {
     );
 
     return (
-        <div className="relative grid shrink-0 grid-cols-2 gap-1 rounded-full border border-primary/20 bg-primary/5 p-1 shadow-[inset_0_1px_2px_rgba(120,137,108,0.12)]">
-            {/* The sage pill tracks the active option. Its width matches one
+        <div className="relative grid shrink-0 grid-cols-2 gap-1 rounded-full border border-brick/20 bg-brick/5 p-1 shadow-[inset_0_1px_2px_rgba(143,20,2,0.12)]">
+            {/* The brick pill tracks the active option. Its width matches one
                 grid column: half the box minus the padding and half the gap. */}
             <span
                 aria-hidden
@@ -46,7 +46,7 @@ export function OrderTypeSwitch({ current }: OrderTypeSwitchProps) {
                             ? 'translateX(0)'
                             : 'translateX(calc(100% + 0.25rem))',
                 }}
-                className="pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.375rem)] rounded-full bg-primary shadow-[0_8px_18px_-10px_rgba(120,137,108,1)] transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-0.375rem)] rounded-full bg-brick shadow-[0_8px_18px_-10px_rgba(143,20,2,1)] transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
             />
 
             {options.map((option) => {
@@ -58,11 +58,9 @@ export function OrderTypeSwitch({ current }: OrderTypeSwitchProps) {
 
                 const className = cn(
                     'relative z-10 flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs tracking-[0.12em] uppercase transition-colors duration-300 sm:px-4',
-                    active
-                        ? 'text-primary-foreground'
-                        : 'text-primary/60 hover:text-primary',
+                    active ? 'text-cream' : 'text-brick/60 hover:text-brick',
                     disabled &&
-                        'cursor-not-allowed text-primary/25 hover:text-primary/25',
+                        'cursor-not-allowed text-brick/25 hover:text-brick/25',
                 );
 
                 const content = (
@@ -97,7 +95,7 @@ export function OrderTypeSwitch({ current }: OrderTypeSwitchProps) {
                         aria-current={active ? 'page' : undefined}
                         className={cn(
                             className,
-                            'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                            'focus-visible:ring-2 focus-visible:ring-brick focus-visible:outline-none',
                         )}
                     >
                         {content}
