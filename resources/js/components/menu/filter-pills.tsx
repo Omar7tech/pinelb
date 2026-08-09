@@ -113,7 +113,7 @@ export function FilterPills({
                 type="button"
                 onClick={onClear}
                 aria-label="Back to all categories"
-                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-brick/20 bg-brick/5 text-brick transition-colors hover:bg-brick hover:text-cream focus-visible:ring-2 focus-visible:ring-brick focus-visible:outline-none"
             >
                 <LayoutGrid className="size-4" />
             </button>
@@ -154,10 +154,10 @@ export function FilterPills({
                                     onFocus={() => revealPill(index)}
                                     aria-pressed={active}
                                     className={cn(
-                                        'cursor-pointer rounded-full border px-4 py-2 text-sm tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                                        'cursor-pointer rounded-full border px-4 py-2 text-sm tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-brick focus-visible:outline-none',
                                         active
-                                            ? 'border-primary bg-primary text-primary-foreground'
-                                            : 'border-primary/20 bg-primary/5 text-primary hover:border-primary/40 hover:bg-primary/10',
+                                            ? 'border-brick bg-brick text-cream'
+                                            : 'border-brick/20 bg-brick/5 text-brick hover:border-brick/40 hover:bg-brick/10',
                                     )}
                                 >
                                     {category.title}
