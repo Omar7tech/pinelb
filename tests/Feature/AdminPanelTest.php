@@ -8,8 +8,13 @@ use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Resources\Products\Pages\ViewProduct;
+use App\Filament\Resources\Spots\Pages\CreateSpot;
+use App\Filament\Resources\Spots\Pages\EditSpot;
+use App\Filament\Resources\Spots\Pages\ListSpots;
+use App\Filament\Resources\Spots\Pages\ViewSpot;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Spot;
 use App\Models\User;
 use App\Settings\GeneralSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +37,12 @@ beforeEach(function (): void {
         'discount_price' => 4.5,
         'category_id' => $this->category->id,
         'variants' => [['name' => 'Large', 'price' => 7]],
+    ]);
+
+    $this->spot = Spot::create([
+        'name' => 'Garden corner',
+        'description' => 'Under the pines.',
+        'price' => 25,
     ]);
 });
 
@@ -105,6 +116,43 @@ it('creates a product without any variants', function (): void {
         ->assertHasNoFormErrors();
 
     expect(Product::where('title', 'Zaatar saj')->value('variants'))->toBe([]);
+});
+
+it('renders spot pages', function (string $page): void {
+    Livewire::test($page, in_array($page, [ListSpots::class, CreateSpot::class], true)
+        ? []
+        : ['record' => $this->spot->getRouteKey()])->assertOk();
+})->with([ListSpots::class, CreateSpot::class, ViewSpot::class, EditSpot::class]);
+
+it('creates and edits a spot through the form', function (): void {
+    Livewire::test(CreateSpot::class)
+        ->fillForm([
+            'name' => 'Fireplace table',
+            'description' => 'Beside the fire.',
+            'price' => 40,
+            'discount_price' => 30,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    Livewire::test(EditSpot::class, ['record' => $this->spot->getRouteKey()])
+        ->fillForm(['is_reserved' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(Spot::where('name', 'Fireplace table')->value('slug'))->toBe('fireplace-table')
+        ->and($this->spot->fresh()->is_reserved)->toBeTrue();
+});
+
+it('rejects a spot discount above its price', function (): void {
+    Livewire::test(CreateSpot::class)
+        ->fillForm([
+            'name' => 'Bad deal',
+            'price' => 10,
+            'discount_price' => 20,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['discount_price']);
 });
 
 it('creates a category without any add-ons', function (): void {

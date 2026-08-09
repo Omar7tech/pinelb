@@ -140,6 +140,7 @@ export default function Welcome() {
                         <HeroButton
                             icon={CalendarCheck}
                             label="حجوز قعدتك"
+                            href="/spots"
                             className="self-center border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto"
                         />
                     </div>

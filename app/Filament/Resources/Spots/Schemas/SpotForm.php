@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Filament\Resources\Spots\Schemas;
+
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class SpotForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Details')
+                    ->description('Basic information about the spot.')
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->components([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('sort_order')
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(0),
+                        Textarea::make('description')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Photos')
+                    ->description('The gallery shown on the spot card. Drag to reorder; the first photo leads.')
+                    ->columnSpanFull()
+                    ->components([
+                        SpatieMediaLibraryFileUpload::make('images')
+                            ->hiddenLabel()
+                            ->collection('images')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(5120)
+                            ->conversion('webp')
+                            ->responsiveImages()
+                            ->imageEditor()
+                            ->panelLayout('grid')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Pricing & status')
+                    ->columnSpanFull()
+                    ->columns(2)
+                    ->components([
+                        TextInput::make('price')
+                            ->required()
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix('$'),
+                        TextInput::make('discount_price')
+                            ->numeric()
+                            ->minValue(0)
+                            ->lte('price')
+                            ->prefix('$'),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->inline(false),
+                        Toggle::make('is_reserved')
+                            ->label('Reserved')
+                            ->helperText('The spot stays on the page but is marked as already taken.')
+                            ->default(false)
+                            ->inline(false),
+                    ]),
+            ]);
+    }
+}

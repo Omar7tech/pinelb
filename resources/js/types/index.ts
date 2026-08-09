@@ -3,5 +3,6 @@ export type * from './banner';
 export type * from './catalog';
 export type * from './checkout';
 export type * from './pricing';
+export type * from './reservation';
 export type * from './shop';
 export type * from './social';
