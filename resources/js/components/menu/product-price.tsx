@@ -37,7 +37,7 @@ export function ProductPrice({
                     <span
                         className={cn(
                             'font-semibold text-primary',
-                            size === 'lg' ? 'text-2xl' : 'text-base',
+                            size === 'lg' ? 'text-2xl' : 'text-lg',
                         )}
                     >
                         {pricing.usd(effectivePrice)}
@@ -51,7 +51,7 @@ export function ProductPrice({
                 <span
                     className={cn(
                         'tracking-wide text-primary/60',
-                        size === 'lg' ? 'text-sm' : 'text-[11px]',
+                        size === 'lg' ? 'text-sm' : 'text-xs',
                     )}
                 >
                     {pricing.lbp(effectivePrice)}
@@ -70,7 +70,7 @@ export function ProductPrice({
             <span
                 className={cn(
                     'font-semibold text-primary',
-                    size === 'lg' ? 'text-2xl' : 'text-base',
+                    size === 'lg' ? 'text-2xl' : 'text-lg',
                 )}
             >
                 {pricing.primary(effectivePrice)}
