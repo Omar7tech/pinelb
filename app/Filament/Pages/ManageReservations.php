@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Settings\ReservationSettings;
 use BackedEnum;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
@@ -53,6 +54,33 @@ class ManageReservations extends SettingsPage
                             ->columnSpanFull()
                             ->visibleJs(<<<'JS'
                                 $get('is_active')
+                                JS),
+                    ]),
+
+                Section::make('Spot map')
+                    ->description('An overhead plan of the place. With it on, customers can switch the reservation page between the spot cards and the map.')
+                    ->columnSpanFull()
+                    ->components([
+                        Toggle::make('map_is_active')
+                            ->label('Enable the map view')
+                            ->helperText('Needs a map image. Turn off to leave the page on cards only.')
+                            ->default(false)
+                            ->columnSpanFull(),
+
+                        FileUpload::make('map_image')
+                            ->label('Map image')
+                            ->helperText('Drop the plan here, then place each spot on it from Reservations → Spot map.')
+                            ->image()
+                            ->disk('public')
+                            ->directory('spot-map')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(5120)
+                            ->imageEditor()
+                            ->requiredIf('map_is_active', true)
+                            ->columnSpanFull()
+                            ->visibleJs(<<<'JS'
+                                $get('map_is_active')
                                 JS),
                     ]),
             ]);

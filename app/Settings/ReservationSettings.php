@@ -2,6 +2,7 @@
 
 namespace App\Settings;
 
+use Illuminate\Support\Facades\Storage;
 use Spatie\LaravelSettings\Settings;
 
 /**
@@ -22,6 +23,17 @@ class ReservationSettings extends Settings
      */
     public ?string $phone_number;
 
+    /**
+     * Whether the spot map is offered. When off the reservation page only ever
+     * lists cards, with no view switch.
+     */
+    public bool $map_is_active;
+
+    /**
+     * The uploaded map image, as a path on the public disk.
+     */
+    public ?string $map_image;
+
     public static function group(): string
     {
         return 'reservation';
@@ -36,5 +48,18 @@ class ReservationSettings extends Settings
         return $this->is_active && filled($this->phone_number)
             ? $this->phone_number
             : null;
+    }
+
+    /**
+     * The public URL of the map image, or null when the map can't be shown —
+     * either it's switched off or no image has been uploaded.
+     */
+    public function usableMapImageUrl(): ?string
+    {
+        if (! $this->map_is_active || blank($this->map_image)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->map_image);
     }
 }

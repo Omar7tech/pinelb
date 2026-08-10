@@ -115,6 +115,24 @@ it('shares the shop status with the storefront', function (): void {
     Carbon::setTestNow();
 });
 
+it('stays closed on a malformed schedule rather than crashing', function (): void {
+    // Sunday: `data_get()` reads null off a non-array row, and `null == 0`
+    // used to match it against Sunday's day number.
+    Carbon::setTestNow(Carbon::parse('2026-08-09 12:00'));
+
+    $settings = shopSettings([
+        'status_mode' => ShopStatusMode::AUTOMATIC,
+        'opening_hours' => [
+            ['day' => 0],
+            'nonsense',
+        ],
+    ]);
+
+    expect($settings->isCurrentlyOpen())->toBeFalse();
+
+    Carbon::setTestNow();
+});
+
 it('drops malformed opening hours from the shared schedule', function (): void {
     shopSettings([
         'status_mode' => ShopStatusMode::AUTOMATIC,

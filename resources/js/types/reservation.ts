@@ -17,6 +17,9 @@ export type Spot = {
     price: number;
     discount_price: number | null;
     is_reserved: boolean;
+    /** Pin position on the spot map, in percent. Null until it's placed. */
+    map_x: number | null;
+    map_y: number | null;
     images: SpotImage[];
 };
 

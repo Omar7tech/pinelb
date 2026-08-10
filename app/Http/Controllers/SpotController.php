@@ -33,6 +33,9 @@ class SpotController extends Controller
 
         return Inertia::render('spots', [
             'spots' => SpotResource::collection($spots)->resolve(),
+            // The map image, when one is uploaded and the map is switched on.
+            // Without it the page stays on cards with no view switch.
+            'mapImage' => $settings->usableMapImageUrl(),
         ]);
     }
 }

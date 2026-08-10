@@ -27,6 +27,10 @@ class SpotResource extends JsonResource
             'price' => (float) $this->price,
             'discount_price' => $this->discount_price !== null ? (float) $this->discount_price : null,
             'is_reserved' => $this->is_reserved,
+            // Where the spot's pin sits on the map, in percent. Null on both
+            // axes means the spot hasn't been placed yet.
+            'map_x' => $this->map_x !== null ? (float) $this->map_x : null,
+            'map_y' => $this->map_y !== null ? (float) $this->map_y : null,
             'images' => $this->getMedia('images')
                 ->map(fn (Media $media): array => [
                     'id' => $media->id,

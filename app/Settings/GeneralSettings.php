@@ -177,10 +177,17 @@ class GeneralSettings extends Settings
      */
     protected function isWithinDay(CarbonInterface $now, CarbonInterface $day): bool
     {
+        // Malformed rows are dropped first: `data_get()` reads null off a
+        // non-array row, and `null == 0` would otherwise match it on Sundays.
         $hours = collect($this->opening_hours)
+            ->filter(fn (mixed $entry): bool => is_array($entry))
             ->firstWhere('day', $day->dayOfWeek);
 
         if ($hours === null || ($hours['is_closed'] ?? false)) {
+            return false;
+        }
+
+        if (blank($hours['opens_at'] ?? null) || blank($hours['closes_at'] ?? null)) {
             return false;
         }
 

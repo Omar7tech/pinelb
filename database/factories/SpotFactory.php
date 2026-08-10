@@ -25,7 +25,17 @@ class SpotFactory extends Factory
             'sort_order' => 0,
             'price' => fake()->randomFloat(2, 5, 60),
             'discount_price' => null,
+            'map_x' => null,
+            'map_y' => null,
         ];
+    }
+
+    /**
+     * A spot pinned to the map, at the given percentage of its width and height.
+     */
+    public function placedAt(float $x = 50, float $y = 50): static
+    {
+        return $this->state(fn (): array => ['map_x' => $x, 'map_y' => $y]);
     }
 
     /**

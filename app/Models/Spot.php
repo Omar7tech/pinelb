@@ -62,6 +62,8 @@ class Spot extends Model implements HasMedia
             'discount_price' => 'decimal:2',
             'is_active' => 'boolean',
             'is_reserved' => 'boolean',
+            'map_x' => 'decimal:2',
+            'map_y' => 'decimal:2',
             'price' => 'decimal:2',
             'sort_order' => 'integer',
         ];
