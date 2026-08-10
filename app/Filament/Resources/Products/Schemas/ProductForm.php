@@ -79,10 +79,6 @@ class ProductForm
                                     ->minValue(0)
                                     ->lte('price')
                                     ->prefix('$'),
-                                TextInput::make('sort_order')
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->default(0),
                                 Toggle::make('is_active')
                                     ->label('Active')
                                     ->default(true)

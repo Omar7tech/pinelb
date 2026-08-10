@@ -120,6 +120,24 @@ it('creates a product without any variants', function (): void {
     expect(Product::where('title', 'Zaatar saj')->value('variants'))->toBe([]);
 });
 
+it('keeps the sort order out of the product form and defaults it on create', function (): void {
+    Livewire::test(CreateProduct::class)
+        ->assertFormFieldDoesNotExist('sort_order')
+        ->fillForm([
+            'title' => 'Halloumi saj',
+            'category_id' => $this->category->id,
+            'price' => 4,
+            'order_type' => 'both',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Product::where('title', 'Halloumi saj')->value('sort_order'))->toBe(0);
+
+    Livewire::test(EditProduct::class, ['record' => $this->product->getRouteKey()])
+        ->assertFormFieldDoesNotExist('sort_order');
+});
+
 it('renders spot pages', function (string $page): void {
     Livewire::test($page, in_array($page, [ListSpots::class, CreateSpot::class], true)
         ? []
@@ -144,6 +162,22 @@ it('creates and edits a spot through the form', function (): void {
 
     expect(Spot::where('name', 'Fireplace table')->value('slug'))->toBe('fireplace-table')
         ->and($this->spot->fresh()->is_reserved)->toBeTrue();
+});
+
+it('keeps the sort order out of the spot form and defaults it on create', function (): void {
+    Livewire::test(CreateSpot::class)
+        ->assertFormFieldDoesNotExist('sort_order')
+        ->fillForm([
+            'name' => 'Pine bench',
+            'price' => 15,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Spot::where('name', 'Pine bench')->value('sort_order'))->toBe(0);
+
+    Livewire::test(EditSpot::class, ['record' => $this->spot->getRouteKey()])
+        ->assertFormFieldDoesNotExist('sort_order');
 });
 
 it('saves the reservation settings', function (): void {

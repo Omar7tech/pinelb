@@ -23,10 +23,6 @@ class SpotForm
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        TextInput::make('sort_order')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(0),
                         Textarea::make('description')
                             ->rows(3)
                             ->columnSpanFull(),
