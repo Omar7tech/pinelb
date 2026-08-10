@@ -1,4 +1,3 @@
-import { Minus, Plus, RotateCcw } from 'lucide-react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SpotFilterValue } from '@/components/spots/spot-filter';
@@ -29,9 +28,11 @@ function isPlaced(spot: Spot): spot is Spot & { map_x: number; map_y: number } {
 
 /**
  * The floor plan with a marker per placed spot. The plan fits its frame at
- * rest, and can be zoomed — wheel, pinch, the buttons or a double tap — then
- * dragged around once it's larger than the frame, so a crowded corner still
- * reads on a phone.
+ * rest, and can be zoomed by pinch, wheel or a double tap, then dragged around
+ * once it's larger than the frame, so a crowded corner still reads on a phone.
+ *
+ * Nothing is laid over the plan itself: on a phone every control is a thumb in
+ * the way, so the gestures carry the zoom and the frame stays clean.
  *
  * Coordinates are percentages of the image box, and every pin hangs by its tip
  * from that point, exactly as the admin editor places it. Pins are
@@ -118,11 +119,6 @@ export function SpotMapView({
         },
         [clampOffset],
     );
-
-    const reset = useCallback((): void => {
-        setScale(1);
-        setOffset((previous) => clampOffset(previous, 1));
-    }, [clampOffset]);
 
     // React listens for wheel passively, so the zoom is bound by hand to keep
     // the page from scrolling under the gesture.
@@ -342,41 +338,6 @@ export function SpotMapView({
                         })}
                     </div>
                 </div>
-
-                {/* Zoom controls, for the mice and keyboards that can't pinch. */}
-                <div className="absolute top-3 right-3 flex flex-col gap-1 rounded-full border border-primary/15 bg-background/85 p-1 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.9)] backdrop-blur">
-                    <button
-                        type="button"
-                        onClick={() => zoomTo(scale * 1.4)}
-                        disabled={scale >= MAX_SCALE}
-                        aria-label="Zoom in"
-                        className="grid size-8 place-items-center rounded-full text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 disabled:hover:bg-transparent"
-                    >
-                        <Plus className="size-4" />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => zoomTo(scale / 1.4)}
-                        disabled={scale <= MIN_SCALE}
-                        aria-label="Zoom out"
-                        className="grid size-8 place-items-center rounded-full text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 disabled:hover:bg-transparent"
-                    >
-                        <Minus className="size-4" />
-                    </button>
-                    <button
-                        type="button"
-                        onClick={reset}
-                        disabled={scale === MIN_SCALE}
-                        aria-label="Reset the map"
-                        className="grid size-8 place-items-center rounded-full text-primary transition-colors hover:bg-primary/10 disabled:opacity-40 disabled:hover:bg-transparent"
-                    >
-                        <RotateCcw className="size-4" />
-                    </button>
-                </div>
-
-                <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/85 px-3 py-1 text-[10px] tracking-[0.16em] text-muted-foreground uppercase backdrop-blur">
-                    Tap a pin for the details
-                </p>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
