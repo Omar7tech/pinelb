@@ -47,9 +47,16 @@
                     return this.spots.filter((spot) => ! this.isPlaced(spot.id));
                 },
 
-                /** The pointer's position over the map, as a percentage of its box. */
+                spotName(id) {
+                    return this.spots.find((spot) => spot.id === id)?.name ?? '';
+                },
+
+                /**
+                 * The pointer's position as a percentage of the image box — the
+                 * same frame of reference the storefront reads the pins in.
+                 */
                 coords(event) {
-                    const rect = this.$refs.map.getBoundingClientRect();
+                    const rect = this.$refs.image.getBoundingClientRect();
                     const clamp = (value) => Math.min(100, Math.max(0, Math.round(value * 100) / 100));
 
                     return {
@@ -71,10 +78,12 @@
                 },
 
                 arm(id) {
+                    // A drag before this one must not swallow the placing click.
+                    this.justDragged = false;
                     this.armedId = this.armedId === id ? null : id;
                 },
 
-                /** Clicking the map drops the armed spot's pin. */
+                /** Clicking the plan drops the armed spot's pin. */
                 mapClick(event) {
                     if (this.justDragged) {
                         this.justDragged = false;
@@ -90,13 +99,19 @@
                     this.armedId = null;
                 },
 
+                /**
+                 * The pin captures the pointer, so every move lands on it — the
+                 * marker follows the cursor even when it runs off the plan.
+                 */
                 startDrag(id, event) {
                     event.preventDefault();
+                    event.stopPropagation();
+                    event.currentTarget.setPointerCapture(event.pointerId);
                     this.dragId = id;
                     this.moved = false;
                 },
 
-                onPointerMove(event) {
+                drag(event) {
                     if (this.dragId === null) {
                         return;
                     }
@@ -106,12 +121,16 @@
                     this.placePin(this.dragId, event);
                 },
 
-                /** A drag that moved swallows the click that follows it. */
-                onPointerUp() {
+                endDrag(event) {
                     if (this.dragId === null) {
                         return;
                     }
 
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                        event.currentTarget.releasePointerCapture(event.pointerId);
+                    }
+
+                    // A drag that moved swallows the click that follows it.
                     this.justDragged = this.moved;
                     this.dragId = null;
                 },
@@ -131,63 +150,75 @@
                     this.saving = false;
                 },
             }"
-            x-on:pointermove.window="onPointerMove($event)"
-            x-on:pointerup.window="onPointerUp()"
             style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem;"
         >
             <div style="flex: 1 1 26rem; min-width: 0;">
                 <div
-                    x-ref="map"
-                    x-on:click="mapClick($event)"
-                    x-bind:style="armedId !== null ? 'cursor: crosshair;' : ''"
-                    style="position: relative; overflow: hidden; border-radius: 0.75rem; border: 1px solid rgba(120, 137, 108, 0.35); touch-action: none;"
+                    style="display: flex; justify-content: center; overflow: hidden; border-radius: 0.75rem; border: 1px solid rgba(120, 137, 108, 0.35); background: rgba(120, 137, 108, 0.06);"
                 >
-                    <img
-                        src="{{ $this->mapImageUrl }}"
-                        alt="Spot map"
-                        draggable="false"
-                        style="display: block; width: 100%; height: auto; user-select: none; pointer-events: none;"
-                    >
-
-                    <template x-for="spot in placedSpots()" :key="spot.id">
-                        <button
-                            type="button"
-                            x-on:pointerdown="startDrag(spot.id, $event)"
-                            x-bind:title="spot.name"
-                            x-bind:style="`
-                                position: absolute;
-                                left: ${positions[spot.id].x}%;
-                                top: ${positions[spot.id].y}%;
-                                transform: translate(-50%, -50%);
-                                display: inline-flex;
-                                align-items: center;
-                                gap: 0.375rem;
-                                padding: 0.25rem 0.5rem 0.25rem 0.3rem;
-                                border-radius: 9999px;
-                                border: 1px solid ${pinColor(spot)};
-                                background: rgba(255, 255, 255, 0.92);
-                                color: #1f2937;
-                                font-size: 0.75rem;
-                                line-height: 1;
-                                white-space: nowrap;
-                                cursor: grab;
-                                touch-action: none;
-                                box-shadow: 0 6px 14px -8px rgba(15, 23, 42, 0.8);
-                            `"
+                    {{-- The wrapper hugs the image, so a pin's percentage is
+                         always read against the plan itself. --}}
+                    <div style="position: relative; display: inline-block; line-height: 0;">
+                        <img
+                            x-ref="image"
+                            x-on:click="mapClick($event)"
+                            x-bind:style="armedId !== null ? 'cursor: crosshair;' : ''"
+                            src="{{ $this->mapImageUrl }}"
+                            alt="Spot map"
+                            draggable="false"
+                            style="display: block; max-width: 100%; max-height: 70vh; width: auto; height: auto; user-select: none; touch-action: none;"
                         >
-                            <span
-                                x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)};`"
-                            ></span>
-                            <span x-text="spot.name"></span>
-                        </button>
-                    </template>
+
+                        <template x-for="spot in placedSpots()" :key="spot.id">
+                            <button
+                                type="button"
+                                x-on:pointerdown="startDrag(spot.id, $event)"
+                                x-on:pointermove="drag($event)"
+                                x-on:pointerup="endDrag($event)"
+                                x-on:pointercancel="endDrag($event)"
+                                x-bind:title="spot.name"
+                                x-bind:aria-label="spot.name"
+                                x-bind:style="`
+                                    position: absolute;
+                                    left: ${positions[spot.id].x}%;
+                                    top: ${positions[spot.id].y}%;
+                                    transform: translate(-50%, -100%);
+                                    padding: 0;
+                                    border: 0;
+                                    background: none;
+                                    line-height: 0;
+                                    cursor: ${dragId === spot.id ? 'grabbing' : 'grab'};
+                                    touch-action: none;
+                                    filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.45));
+                                `"
+                            >
+                                {{-- The same teardrop the storefront draws, tip
+                                     on the point, so both views agree. --}}
+                                <svg viewBox="0 0 24 34" style="display: block; height: 2.25rem; width: auto;">
+                                    <path
+                                        d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
+                                        x-bind:fill="pinColor(spot)"
+                                        stroke="#ffffff"
+                                        stroke-width="1.5"
+                                    />
+                                    <circle cx="12" cy="11.5" r="4" fill="#ffffff" />
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
                 </div>
 
-                <p style="margin-top: 0.75rem; font-size: 0.875rem; opacity: 0.7;">
-                    <span x-show="armedId === null">Drag a pin to move it, or pick a spot on the right to place it.</span>
+                <p style="margin-top: 0.75rem; font-size: 0.875rem; opacity: 0.75;">
+                    <span x-show="armedId === null && dragId === null">
+                        Drag a pin to move it, or pick a spot on the right and click the plan to place it.
+                    </span>
                     <span x-show="armedId !== null" x-cloak>
-                        Click the map to place
-                        <strong x-text="spots.find((spot) => spot.id === armedId)?.name"></strong>.
+                        Click the plan to place <strong x-text="spotName(armedId)"></strong>.
+                    </span>
+                    <span x-show="dragId !== null" x-cloak>
+                        <strong x-text="spotName(dragId)"></strong>
+                        at <span x-text="positions[dragId]?.x"></span>%,
+                        <span x-text="positions[dragId]?.y"></span>%
                     </span>
                 </p>
             </div>
@@ -235,9 +266,7 @@
 
                     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                         <template x-for="spot in placedSpots()" :key="spot.id">
-                            <div
-                                style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem;"
-                            >
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem;">
                                 <span style="display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0;">
                                     <span
                                         x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)};`"

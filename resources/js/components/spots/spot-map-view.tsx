@@ -1,7 +1,8 @@
-import { Lock, Minus, Plus, RotateCcw } from 'lucide-react';
+import { Minus, Plus, RotateCcw } from 'lucide-react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SpotFilterValue } from '@/components/spots/spot-filter';
+import { SpotPin } from '@/components/spots/spot-pin';
 import { cn } from '@/lib/utils';
 import type { Spot } from '@/types';
 
@@ -27,12 +28,14 @@ function isPlaced(spot: Spot): spot is Spot & { map_x: number; map_y: number } {
 }
 
 /**
- * The floor plan with a pin per placed spot. The map fits its column at rest,
- * and can be zoomed — wheel, pinch or the buttons — and dragged around once
- * it's larger than its frame, so a crowded corner can be read on a phone.
+ * The floor plan with a marker per placed spot. The plan fits its frame at
+ * rest, and can be zoomed — wheel, pinch, the buttons or a double tap — then
+ * dragged around once it's larger than the frame, so a crowded corner still
+ * reads on a phone.
  *
- * Pins keep their size whatever the zoom: they're counter-scaled, so a pin
- * stays tappable rather than growing into a slab.
+ * Coordinates are percentages of the image box, and every pin hangs by its tip
+ * from that point, exactly as the admin editor places it. Pins are
+ * counter-scaled so they keep their size — and their tip — at any zoom.
  */
 export function SpotMapView({
     spots,
@@ -57,7 +60,7 @@ export function SpotMapView({
     const placed = spots.filter(isPlaced);
     const missing = spots.length - placed.length;
 
-    /** Keep the plan covering its frame however far it has been dragged. */
+    /** Keep the plan covering, or centred in, its frame. */
     const clampOffset = useCallback(
         (next: { x: number; y: number }, nextScale: number) => {
             const viewport = viewportRef.current;
@@ -118,8 +121,8 @@ export function SpotMapView({
 
     const reset = useCallback((): void => {
         setScale(1);
-        setOffset({ x: 0, y: 0 });
-    }, []);
+        setOffset((previous) => clampOffset(previous, 1));
+    }, [clampOffset]);
 
     // React listens for wheel passively, so the zoom is bound by hand to keep
     // the page from scrolling under the gesture.
@@ -144,14 +147,16 @@ export function SpotMapView({
         return () => viewport.removeEventListener('wheel', onWheel);
     }, [zoomTo, scale]);
 
-    // The plan shrinks with the window; re-clamp so no gap creeps in at the edge.
+    // The plan is centred once it has been measured, and re-centred whenever
+    // the window changes its frame.
     useEffect(() => {
-        const onResize = (): void =>
+        const recentre = (): void =>
             setOffset((previous) => clampOffset(previous, scale));
 
-        window.addEventListener('resize', onResize);
+        recentre();
+        window.addEventListener('resize', recentre);
 
-        return () => window.removeEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', recentre);
     }, [clampOffset, scale]);
 
     const pointerCentre = (): { x: number; y: number } => {
@@ -241,19 +246,16 @@ export function SpotMapView({
             pinchRef.current = null;
         }
 
-        panRef.current =
-            pointersRef.current.size === 1
-                ? (() => {
-                      const [point] = [...pointersRef.current.values()];
+        const [remaining] = [...pointersRef.current.values()];
 
-                      return { x: point.x - offset.x, y: point.y - offset.y };
-                  })()
-                : null;
+        panRef.current = remaining
+            ? { x: remaining.x - offset.x, y: remaining.y - offset.y }
+            : null;
     };
 
     return (
         <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-[1.5rem] border border-primary/15 bg-card/60">
+            <div className="relative overflow-hidden rounded-[1.5rem] border border-primary/15 bg-primary/5">
                 <div
                     ref={viewportRef}
                     onPointerDown={handlePointerDown}
@@ -261,7 +263,7 @@ export function SpotMapView({
                     onPointerUp={handlePointerUp}
                     onPointerCancel={handlePointerUp}
                     onDoubleClick={(event) =>
-                        zoomTo(scale > 1 ? 1 : 2, {
+                        zoomTo(scale > 1 ? 1 : 2.5, {
                             x: event.clientX,
                             y: event.clientY,
                         })
@@ -277,13 +279,19 @@ export function SpotMapView({
                             transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
                             transformOrigin: '0 0',
                         }}
-                        className="relative w-full origin-top-left"
+                        className="relative w-fit"
                     >
                         <img
                             src={image}
                             alt="Map of the spots"
                             draggable={false}
-                            className="block h-auto w-full"
+                            onLoad={() =>
+                                setOffset((previous) =>
+                                    clampOffset(previous, scale),
+                                )
+                            }
+                            style={{ maxHeight: '72vh' }}
+                            className="block h-auto w-auto max-w-full"
                         />
 
                         {placed.map((spot) => {
@@ -293,77 +301,50 @@ export function SpotMapView({
                                     : !spot.is_reserved;
 
                             return (
-                                <div
+                                <button
                                     key={spot.id}
+                                    type="button"
+                                    onPointerDown={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                    onClick={() => {
+                                        if (movedRef.current) {
+                                            return;
+                                        }
+
+                                        onSelect(spot);
+                                    }}
+                                    disabled={!matches}
+                                    aria-label={`${spot.name} — ${
+                                        spot.is_reserved
+                                            ? 'reserved'
+                                            : 'available'
+                                    }`}
                                     style={{
                                         left: `${spot.map_x}%`,
                                         top: `${spot.map_y}%`,
+                                        // The pin hangs by its tip from the
+                                        // point, and shrugs off the zoom so it
+                                        // keeps both its size and its tip.
+                                        transform: `translate(-50%, -100%) scale(${1 / scale})`,
+                                        transformOrigin: 'bottom center',
                                     }}
-                                    className="absolute -translate-x-1/2 -translate-y-full"
+                                    className={cn(
+                                        'absolute origin-bottom transition-opacity duration-200',
+                                        matches
+                                            ? 'cursor-pointer opacity-100 hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
+                                            : 'pointer-events-none opacity-30',
+                                    )}
                                 >
-                                    <div
-                                        style={{
-                                            transform: `scale(${1 / scale})`,
-                                            transformOrigin: 'bottom center',
-                                        }}
-                                        className="flex flex-col items-center gap-1"
-                                    >
-                                        <button
-                                            type="button"
-                                            onPointerDown={(event) =>
-                                                event.stopPropagation()
-                                            }
-                                            onClick={() => {
-                                                if (movedRef.current) {
-                                                    return;
-                                                }
-
-                                                onSelect(spot);
-                                            }}
-                                            disabled={!matches}
-                                            aria-label={`${spot.name} — ${
-                                                spot.is_reserved
-                                                    ? 'reserved'
-                                                    : 'available'
-                                            }`}
-                                            className={cn(
-                                                'flex max-w-28 flex-col items-center gap-1 transition-opacity',
-                                                matches
-                                                    ? 'cursor-pointer opacity-100'
-                                                    : 'pointer-events-none opacity-35',
-                                            )}
-                                        >
-                                            <span
-                                                className={cn(
-                                                    'grid size-7 place-items-center rounded-full border-2 border-background text-primary-foreground shadow-[0_6px_14px_-8px_rgba(15,23,42,0.9)]',
-                                                    spot.is_reserved
-                                                        ? 'bg-brick'
-                                                        : 'bg-primary',
-                                                )}
-                                            >
-                                                {spot.is_reserved ? (
-                                                    <Lock
-                                                        aria-hidden
-                                                        className="size-3.5"
-                                                    />
-                                                ) : (
-                                                    <span className="size-2 rounded-full bg-primary-foreground" />
-                                                )}
-                                            </span>
-
-                                            <span className="max-w-28 truncate rounded-full bg-background/85 px-2 py-0.5 text-[10px] text-primary backdrop-blur">
-                                                {spot.name}
-                                            </span>
-                                        </button>
-                                    </div>
-                                </div>
+                                    <SpotPin reserved={spot.is_reserved} />
+                                </button>
                             );
                         })}
                     </div>
                 </div>
 
                 {/* Zoom controls, for the mice and keyboards that can't pinch. */}
-                <div className="absolute top-3 right-3 flex flex-col gap-1.5 rounded-full border border-primary/15 bg-background/85 p-1 backdrop-blur">
+                <div className="absolute top-3 right-3 flex flex-col gap-1 rounded-full border border-primary/15 bg-background/85 p-1 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.9)] backdrop-blur">
                     <button
                         type="button"
                         onClick={() => zoomTo(scale * 1.4)}
@@ -392,6 +373,10 @@ export function SpotMapView({
                         <RotateCcw className="size-4" />
                     </button>
                 </div>
+
+                <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-background/85 px-3 py-1 text-[10px] tracking-[0.16em] text-muted-foreground uppercase backdrop-blur">
+                    Tap a pin for the details
+                </p>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-xs text-muted-foreground">
