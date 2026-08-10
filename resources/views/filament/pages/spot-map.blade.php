@@ -24,7 +24,11 @@
             </x-filament::section>
         @endunless
 
+        {{-- The layout lives in the browser until it's saved, so the re-render
+             that follows a save must not morph the arranged pins back to what
+             the server last knew. --}}
         <div
+            wire:ignore
             x-data="{
                 spots: @js($this->spots),
                 positions: @js((object) $this->positions),
@@ -169,7 +173,12 @@
                             style="display: block; max-width: 100%; max-height: 70vh; width: auto; height: auto; user-select: none; touch-action: none;"
                         >
 
-                        <template x-for="spot in placedSpots()" :key="spot.id">
+                        {{-- Every spot keeps its own marker in the DOM and the
+                             unplaced ones are simply hidden. Removing a pin and
+                             dropping it again then updates the same element,
+                             rather than rebuilding one that could come back
+                             carrying its old position. --}}
+                        <template x-for="spot in spots" :key="spot.id">
                             <button
                                 type="button"
                                 x-on:pointerdown="startDrag(spot.id, $event)"
@@ -179,9 +188,10 @@
                                 x-bind:title="spot.name"
                                 x-bind:aria-label="spot.name"
                                 x-bind:style="`
+                                    display: ${isPlaced(spot.id) ? 'block' : 'none'};
                                     position: absolute;
-                                    left: ${positions[spot.id].x}%;
-                                    top: ${positions[spot.id].y}%;
+                                    left: ${positions[spot.id]?.x ?? 0}%;
+                                    top: ${positions[spot.id]?.y ?? 0}%;
                                     transform: translate(-50%, -100%);
                                     padding: 0;
                                     border: 0;
