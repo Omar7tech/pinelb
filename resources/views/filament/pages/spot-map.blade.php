@@ -258,6 +258,17 @@
                         <span x-text="positions[dragId]?.y"></span>%
                     </span>
                 </p>
+
+                {{-- What each pin colour means, so the plan is read without
+                     opening a single spot. --}}
+                <div style="display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.75;">
+                    @foreach ([['#78896c', 'Free'], ['#b91c1c', 'Reserved'], ['#64748b', 'Landmark'], ['#6b7280', 'Hidden']] as [$color, $label])
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem;">
+                            <span style="display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: {{ $color }};"></span>
+                            {{ $label }}
+                        </span>
+                    @endforeach
+                </div>
             </div>
 
             <aside style="flex: 1 1 16rem; display: flex; flex-direction: column; gap: 1rem;">
@@ -290,6 +301,7 @@
                                     <span
                                         x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)}; flex: none;`"
                                     ></span>
+                                    @include('filament.pages.partials.spot-kind-icon')
                                     <span x-text="spot.name" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
                                 </span>
                                 <span
@@ -314,8 +326,9 @@
                             <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem;">
                                 <span style="display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0;">
                                     <span
-                                        x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)};`"
+                                        x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)}; flex: none;`"
                                     ></span>
+                                    @include('filament.pages.partials.spot-kind-icon')
                                     <span x-text="spot.name" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
                                 </span>
 

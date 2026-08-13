@@ -111,6 +111,21 @@ it('hands the pin editor each spot\'s colour', function (): void {
     expect($spots[0]['pin_color'])->toBe('#3b82f6');
 });
 
+it('tells the pin editor which spots are landmarks', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/plan.png']);
+    Spot::factory()->landmark()->create(['name' => 'WC']);
+
+    $page = Livewire::test(SpotMap::class)
+        ->assertOk()
+        // The colour key sits under the plan, so a pin is read without
+        // opening the spot behind it.
+        ->assertSee('Landmark');
+
+    expect($page->instance()->spots[0]['is_reservable'])->toBeFalse();
+});
+
 it('renders the pin editor with its spots and saved pins', function (): void {
     $this->actingAs(User::factory()->create());
 
