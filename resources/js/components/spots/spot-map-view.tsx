@@ -59,7 +59,11 @@ export function SpotMapView({
     const [offset, setOffset] = useState({ x: 0, y: 0 });
 
     const placed = spots.filter(isPlaced);
-    const missing = spots.length - placed.length;
+    // Only bookable spots are missed from the map, since they're the ones the
+    // cards can still show.
+    const missing = spots.filter(
+        (spot) => spot.is_reservable && !isPlaced(spot),
+    ).length;
 
     /** Keep the plan covering, or centred in, its frame. */
     const clampOffset = useCallback(
@@ -291,6 +295,31 @@ export function SpotMapView({
                         />
 
                         {placed.map((spot) => {
+                            // A landmark answers "where is the WC", so it stays
+                            // legible on both sides of the filter — and there is
+                            // nothing to open behind it.
+                            if (!spot.is_reservable) {
+                                return (
+                                    <span
+                                        key={spot.id}
+                                        style={{
+                                            left: `${spot.map_x}%`,
+                                            top: `${spot.map_y}%`,
+                                            transform: `translate(-50%, -50%) scale(${1 / scale})`,
+                                            transformOrigin: 'center',
+                                        }}
+                                        className="pointer-events-none absolute"
+                                    >
+                                        <SpotPin
+                                            reserved={false}
+                                            landmark
+                                            color={spot.pin_color}
+                                            name={spot.name}
+                                        />
+                                    </span>
+                                );
+                            }
+
                             const matches =
                                 filter === 'reserved'
                                     ? spot.is_reserved
@@ -358,6 +387,12 @@ export function SpotMapView({
                         <span className="size-2.5 rounded-full bg-brick" />
                         Reserved
                     </span>
+                    {placed.some((spot) => !spot.is_reservable) && (
+                        <span className="inline-flex items-center gap-1.5">
+                            <span className="size-2.5 rounded-full bg-slate-500" />
+                            Facilities
+                        </span>
+                    )}
                 </div>
 
                 {missing > 0 && (

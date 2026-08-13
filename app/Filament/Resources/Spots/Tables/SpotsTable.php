@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\Spots\Tables;
 
 use App\Filament\Tables\Columns\PriceColumn;
+use App\Models\Spot;
 use App\Settings\GeneralSettings;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -41,11 +44,22 @@ class SpotsTable
                     ->label('Price')
                     ->sortable()
                     ->lbpRate($lbpRate),
+                IconColumn::make('is_reservable')
+                    ->label('Bookable')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedCalendarDays)
+                    ->falseIcon(Heroicon::OutlinedMapPin)
+                    ->falseColor('gray')
+                    ->tooltip(fn (Spot $record): string => $record->is_reservable ? 'Bookable spot' : 'Landmark — map only')
+                    ->sortable(),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->sortable(),
                 ToggleColumn::make('is_reserved')
                     ->label('Reserved')
+                    // A landmark is never taken, so its toggle would say
+                    // nothing.
+                    ->disabled(fn (Spot $record): bool => ! $record->is_reservable)
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -57,6 +71,11 @@ class SpotsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                TernaryFilter::make('is_reservable')
+                    ->label('Bookable')
+                    ->placeholder('All spots')
+                    ->trueLabel('Bookable spots')
+                    ->falseLabel('Landmarks'),
                 TernaryFilter::make('is_active')->label('Active'),
                 TernaryFilter::make('is_reserved')->label('Reserved'),
                 TernaryFilter::make('discount_price')

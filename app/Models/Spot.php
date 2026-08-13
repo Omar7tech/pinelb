@@ -28,6 +28,21 @@ class Spot extends Model implements HasMedia
      * Unlike the menu models a spot keeps a whole gallery, so the collection is
      * left multi-file and ordered by the media library's own `order_column`.
      */
+    /**
+     * A landmark is never booked, so it never carries a price — whatever was
+     * typed before it was turned into one is dropped rather than left behind.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Spot $spot): void {
+            if (! $spot->is_reservable) {
+                $spot->price = null;
+                $spot->discount_price = null;
+                $spot->is_reserved = false;
+            }
+        });
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')
@@ -62,6 +77,7 @@ class Spot extends Model implements HasMedia
             'discount_price' => 'decimal:2',
             'is_active' => 'boolean',
             'is_reserved' => 'boolean',
+            'is_reservable' => 'boolean',
             'map_x' => 'decimal:2',
             'map_y' => 'decimal:2',
             'price' => 'decimal:2',

@@ -87,6 +87,38 @@ it('sends the discount price when the spot is on offer', function (): void {
             ->where('spots.0.discount_price', 15));
 });
 
+it('sends landmarks with the spots, marked as not bookable', function (): void {
+    Spot::factory()->landmark()->create(['name' => 'WC']);
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('spots', 1)
+            ->where('spots.0.name', 'WC')
+            ->where('spots.0.is_reservable', false)
+            ->where('spots.0.price', null));
+});
+
+it('sends a null price for a spot quoted on request', function (): void {
+    Spot::factory()->withoutPrice()->create(['name' => 'Big table']);
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('spots.0.is_reservable', true)
+            ->where('spots.0.price', null)
+            ->where('spots.0.discount_price', null));
+});
+
+it('drops the price and reservation of a spot turned into a landmark', function (): void {
+    $spot = Spot::factory()->reserved()->create(['price' => 40, 'discount_price' => 20]);
+
+    $spot->update(['is_reservable' => false]);
+
+    expect($spot->fresh())
+        ->price->toBeNull()
+        ->discount_price->toBeNull()
+        ->is_reserved->toBeFalse();
+});
+
 it('sends customers home while reservations are switched off', function (): void {
     reservationSettings(['is_active' => false]);
     Spot::factory()->create();

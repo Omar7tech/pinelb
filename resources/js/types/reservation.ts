@@ -14,9 +14,12 @@ export type Spot = {
     name: string;
     slug: string;
     description: string | null;
-    price: number;
+    /** Null where no price is listed — a landmark, or a spot quoted on request. */
+    price: number | null;
     discount_price: number | null;
     is_reserved: boolean;
+    /** Landmarks — parking, WC, playground — are read on the map, never booked. */
+    is_reservable: boolean;
     /** Pin position on the spot map, in percent. Null until it's placed. */
     map_x: number | null;
     map_y: number | null;

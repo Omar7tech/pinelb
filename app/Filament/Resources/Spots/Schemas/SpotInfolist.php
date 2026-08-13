@@ -35,7 +35,13 @@ class SpotInfolist
                     ->columnSpanFull()
                     ->columns(2)
                     ->components([
-                        TextEntry::make('price')->money('USD'),
+                        IconEntry::make('is_reservable')
+                            ->label('Bookable')
+                            ->boolean()
+                            ->columnSpanFull(),
+                        TextEntry::make('price')
+                            ->money('USD')
+                            ->placeholder('-'),
                         TextEntry::make('discount_price')
                             ->label('Discount price')
                             ->money('USD')

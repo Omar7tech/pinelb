@@ -24,9 +24,14 @@ class SpotResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'price' => (float) $this->price,
+            // Null where no price is listed — a landmark, or a spot quoted on
+            // request.
+            'price' => $this->price !== null ? (float) $this->price : null,
             'discount_price' => $this->discount_price !== null ? (float) $this->discount_price : null,
             'is_reserved' => $this->is_reserved,
+            // Landmarks — the parking, the WC, the playground — are read on the
+            // map and never booked.
+            'is_reservable' => $this->is_reservable,
             // Where the spot's pin sits on the map, in percent. Null on both
             // axes means the spot hasn't been placed yet.
             'map_x' => $this->map_x !== null ? (float) $this->map_x : null,

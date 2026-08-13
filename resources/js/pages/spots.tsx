@@ -28,11 +28,22 @@ interface SpotsProps {
  */
 export default function Spots({ spots, mapImage }: SpotsProps) {
     const contactNumber = usePage().props.reservations.phoneNumber;
-    const counts = useMemo(() => {
-        const available = spots.filter((spot) => !spot.is_reserved).length;
 
-        return { available, reserved: spots.length - available };
-    }, [spots]);
+    // Landmarks — the parking, the WC, the playground — only give the map its
+    // bearings, so the cards, the filter and its counts are about the bookable
+    // spots alone.
+    const bookableSpots = useMemo(
+        () => spots.filter((spot) => spot.is_reservable),
+        [spots],
+    );
+
+    const counts = useMemo(() => {
+        const available = bookableSpots.filter(
+            (spot) => !spot.is_reserved,
+        ).length;
+
+        return { available, reserved: bookableSpots.length - available };
+    }, [bookableSpots]);
 
     // Open on the free spots, since that's what people came for. On a fully
     // booked night there's nothing to show there, so start on the taken ones.
@@ -60,10 +71,10 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
     // costs nothing and needs no round trip.
     const visibleSpots = useMemo(
         () =>
-            spots.filter((spot) =>
+            bookableSpots.filter((spot) =>
                 filter === 'reserved' ? spot.is_reserved : !spot.is_reserved,
             ),
-        [spots, filter],
+        [bookableSpots, filter],
     );
 
     const showingMap = mapAvailable && view === 'map';
@@ -88,11 +99,13 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
 
                         {spots.length > 0 && (
                             <div className="flex flex-wrap items-center justify-between gap-3">
-                                <SpotFilter
-                                    value={filter}
-                                    onChange={setFilter}
-                                    counts={counts}
-                                />
+                                {bookableSpots.length > 0 && (
+                                    <SpotFilter
+                                        value={filter}
+                                        onChange={setFilter}
+                                        counts={counts}
+                                    />
+                                )}
 
                                 {mapAvailable && (
                                     <SpotViewSwitch
@@ -129,7 +142,7 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
                         </div>
                     ) : (
                         <p className="py-8 text-sm text-muted-foreground">
-                            {spots.length === 0
+                            {bookableSpots.length === 0
                                 ? 'No spots available right now.'
                                 : filter === 'available'
                                   ? 'Every spot is taken right now.'

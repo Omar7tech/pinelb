@@ -55,16 +55,29 @@ class SpotForm
                     ->columnSpanFull()
                     ->columns(2)
                     ->components([
+                        Toggle::make('is_reservable')
+                            ->label('Bookable')
+                            ->helperText('Turn off for a landmark customers only read the map by — the parking, the WC, the playground. It keeps its pin and name, but no price and no reserve button.')
+                            ->default(true)
+                            ->columnSpanFull()
+                            ->inline(false),
+
                         TextInput::make('price')
-                            ->required()
+                            ->helperText('Leave empty to list the spot without a price.')
                             ->numeric()
                             ->minValue(0)
-                            ->prefix('$'),
+                            ->prefix('$')
+                            ->visibleJs(<<<'JS'
+                                $get('is_reservable')
+                                JS),
                         TextInput::make('discount_price')
                             ->numeric()
                             ->minValue(0)
                             ->lte('price')
-                            ->prefix('$'),
+                            ->prefix('$')
+                            ->visibleJs(<<<'JS'
+                                $get('is_reservable') && $get('price')
+                                JS),
                         Toggle::make('is_active')
                             ->label('Active')
                             ->default(true)
@@ -73,7 +86,10 @@ class SpotForm
                             ->label('Reserved')
                             ->helperText('The spot stays on the page but is marked as already taken.')
                             ->default(false)
-                            ->inline(false),
+                            ->inline(false)
+                            ->visibleJs(<<<'JS'
+                                $get('is_reservable')
+                                JS),
                     ]),
 
                 Section::make('Map pin')
@@ -82,7 +98,7 @@ class SpotForm
                     ->components([
                         ColorPicker::make('pin_color')
                             ->label('Pin colour')
-                            ->helperText('Leave empty to keep the default colours — sage while the spot is free, brick once it\'s reserved.')
+                            ->helperText('Leave empty to keep the default colours — sage while the spot is free, brick once it\'s reserved, slate for a landmark.')
                             ->hex()
                             ->columnSpanFull(),
                     ]),

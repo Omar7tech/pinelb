@@ -22,6 +22,7 @@ class SpotFactory extends Factory
             'description' => fake()->sentence(),
             'is_active' => true,
             'is_reserved' => false,
+            'is_reservable' => true,
             'sort_order' => 0,
             'price' => fake()->randomFloat(2, 5, 60),
             'discount_price' => null,
@@ -37,6 +38,30 @@ class SpotFactory extends Factory
     public function placedAt(float $x = 50, float $y = 50): static
     {
         return $this->state(fn (): array => ['map_x' => $x, 'map_y' => $y]);
+    }
+
+    /**
+     * A landmark rather than a bookable spot — the parking, the WC, the
+     * playground. It is read on the map, never reserved.
+     */
+    public function landmark(): static
+    {
+        return $this->state(fn (): array => [
+            'is_reservable' => false,
+            'price' => null,
+            'discount_price' => null,
+        ]);
+    }
+
+    /**
+     * A bookable spot quoted on request rather than at a listed price.
+     */
+    public function withoutPrice(): static
+    {
+        return $this->state(fn (): array => [
+            'price' => null,
+            'discount_price' => null,
+        ]);
     }
 
     /**

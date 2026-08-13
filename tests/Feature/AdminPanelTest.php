@@ -203,6 +203,47 @@ it('requires a reservation number while reservations are enabled', function (): 
         ->assertHasFormErrors(['phone_number']);
 });
 
+it('creates a spot without a price', function (): void {
+    Livewire::test(CreateSpot::class)
+        ->fillForm([
+            'name' => 'Quoted table',
+            'price' => null,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Spot::where('name', 'Quoted table')->value('price'))->toBeNull();
+});
+
+it('creates a landmark that carries no price or reservation', function (): void {
+    Livewire::test(CreateSpot::class)
+        ->fillForm([
+            'name' => 'Parking',
+            'is_reservable' => false,
+            'price' => 25,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Spot::where('name', 'Parking')->first())
+        ->is_reservable->toBeFalse()
+        ->price->toBeNull()
+        ->is_reserved->toBeFalse();
+});
+
+it('splits the spot list into bookable spots and landmarks', function (): void {
+    Spot::factory()->create(['name' => 'Fireplace table']);
+    Spot::factory()->landmark()->create(['name' => 'Playground']);
+
+    Livewire::test(ListSpots::class)
+        ->assertCanSeeTableRecords(Spot::all())
+        ->set('activeTab', 'bookable')
+        ->assertCanNotSeeTableRecords(Spot::where('is_reservable', false)->get())
+        ->set('activeTab', 'landmarks')
+        ->assertCanSeeTableRecords(Spot::where('is_reservable', false)->get())
+        ->assertCanNotSeeTableRecords(Spot::where('is_reservable', true)->get());
+});
+
 it('rejects a spot discount above its price', function (): void {
     Livewire::test(CreateSpot::class)
         ->fillForm([

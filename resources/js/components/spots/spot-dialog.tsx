@@ -79,11 +79,19 @@ export function SpotDialog({
                 {/* Fixed footer: the price and action stay visible however long
                     the copy runs. */}
                 <div className="flex shrink-0 items-center justify-between gap-3 border-t border-primary/15 bg-primary/5 px-5 py-4">
-                    <ProductPrice
-                        basePrice={spot.price}
-                        discountPrice={spot.discount_price}
-                        size="lg"
-                    />
+                    {/* A spot quoted on request carries no price; the reserve
+                        action then stands on its own. */}
+                    {spot.price !== null ? (
+                        <ProductPrice
+                            basePrice={spot.price}
+                            discountPrice={spot.discount_price}
+                            size="lg"
+                        />
+                    ) : (
+                        <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
+                            Price on request
+                        </span>
+                    )}
 
                     {spot.is_reserved ? (
                         <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">

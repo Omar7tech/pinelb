@@ -3,7 +3,9 @@ import { cn } from '@/lib/utils';
 interface SpotPinProps {
     /** Taken spots are drawn in the brick tone, free ones in sage. */
     reserved: boolean;
-    /** A colour chosen for this pin, which overrides the two tones above. */
+    /** A landmark — parking, WC, playground — sits outside those two tones. */
+    landmark?: boolean;
+    /** A colour chosen for this pin, which overrides the tones above. */
     color?: string | null;
     /** Written under the dot, so a spot is read without opening it. */
     name?: string;
@@ -18,7 +20,13 @@ interface SpotPinProps {
  * The name hangs off the dot rather than sitting in its flow, so a long one
  * can't drag the dot off the point.
  */
-export function SpotPin({ reserved, color, name, className }: SpotPinProps) {
+export function SpotPin({
+    reserved,
+    landmark = false,
+    color,
+    name,
+    className,
+}: SpotPinProps) {
     return (
         <span
             style={color ? { backgroundColor: color } : undefined}
@@ -26,7 +34,12 @@ export function SpotPin({ reserved, color, name, className }: SpotPinProps) {
                 'relative block size-3 rounded-full ring-2 shadow-[0_2px_5px_rgba(15,23,42,0.45)] ring-background',
                 // The chosen colour is carried by the inline style, so the
                 // state tone is only asked for when there isn't one.
-                !color && (reserved ? 'bg-brick' : 'bg-primary'),
+                !color &&
+                    (landmark
+                        ? 'bg-slate-500'
+                        : reserved
+                          ? 'bg-brick'
+                          : 'bg-primary'),
                 className,
             )}
         >

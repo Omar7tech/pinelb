@@ -83,10 +83,16 @@ function SpotCardComponent({ spot }: SpotCardProps) {
                     )}
 
                     <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-                        <ProductPrice
-                            basePrice={spot.price}
-                            discountPrice={spot.discount_price}
-                        />
+                        {spot.price !== null ? (
+                            <ProductPrice
+                                basePrice={spot.price}
+                                discountPrice={spot.discount_price}
+                            />
+                        ) : (
+                            <span className="text-[10px] tracking-[0.16em] text-muted-foreground uppercase">
+                                Price on request
+                            </span>
+                        )}
 
                         <div className="flex shrink-0 items-center gap-2">
                             <button

@@ -5,7 +5,11 @@
 @endphp
 
 <div style="display: flex; flex-direction: column; padding: 0.5rem 0.75rem;">
-    @if ($hasDiscount)
+    {{-- A landmark carries no price, and neither does a spot quoted on
+         request. --}}
+    @if ($record->price === null)
+        <span style="font-size: 0.875rem; color: #9ca3af;">—</span>
+    @elseif ($hasDiscount)
         <span style="font-size: 0.875rem; color: #9ca3af; text-decoration: line-through;">
             {{ \Illuminate\Support\Number::currency((float) $record->price, 'USD') }}
         </span>
@@ -18,7 +22,7 @@
         </span>
     @endif
 
-    @if ($lbpRate)
+    @if ($lbpRate && $record->price !== null)
         <span style="font-size: 0.75rem; color: #6b7280;">
             {{ \Illuminate\Support\Number::format(\App\Filament\Tables\Columns\PriceColumn::convertUsdToLbp($effectivePrice, $lbpRate)) }} LBP
         </span>

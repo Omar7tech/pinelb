@@ -35,7 +35,7 @@ class SpotMap extends Page
     /**
      * Every spot, placed or not, in display order.
      *
-     * @return array<int, array{id: int, name: string, is_active: bool, is_reserved: bool, pin_color: ?string}>
+     * @return array<int, array{id: int, name: string, is_active: bool, is_reserved: bool, is_reservable: bool, pin_color: ?string}>
      */
     #[Computed]
     public function spots(): array
@@ -43,12 +43,13 @@ class SpotMap extends Page
         return Spot::query()
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['id', 'name', 'is_active', 'is_reserved', 'pin_color'])
+            ->get(['id', 'name', 'is_active', 'is_reserved', 'is_reservable', 'pin_color'])
             ->map(fn (Spot $spot): array => [
                 'id' => $spot->id,
                 'name' => $spot->name,
                 'is_active' => $spot->is_active,
                 'is_reserved' => $spot->is_reserved,
+                'is_reservable' => $spot->is_reservable,
                 'pin_color' => $spot->pin_color,
             ])
             ->all();

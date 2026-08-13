@@ -150,6 +150,12 @@
                         return spot.pin_color;
                     }
 
+                    // A landmark is never booked, so it stays out of the
+                    // free/taken palette.
+                    if (! spot.is_reservable) {
+                        return '#64748b';
+                    }
+
                     return spot.is_reserved ? '#b91c1c' : '#78896c';
                 },
 
