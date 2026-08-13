@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils';
 interface SpotPinProps {
     /** Taken spots are drawn in the brick tone, free ones in sage. */
     reserved: boolean;
+    /** A colour chosen for this pin, which overrides the two tones above. */
+    color?: string | null;
     className?: string;
 }
 
@@ -12,14 +14,17 @@ interface SpotPinProps {
  * on a 24×34 canvas with the tip at (12, 34) — anchor it with `translate(-50%,
  * -100%)` and the tip sits on the point.
  */
-export function SpotPin({ reserved, className }: SpotPinProps) {
+export function SpotPin({ reserved, color, className }: SpotPinProps) {
     return (
         <svg
             viewBox="0 0 24 34"
             aria-hidden
+            style={color ? { color } : undefined}
             className={cn(
                 'h-9 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)]',
-                reserved ? 'text-brick' : 'text-primary',
+                // The chosen colour is carried by the inline style, so the
+                // state tone is only asked for when there isn't one.
+                !color && (reserved ? 'text-brick' : 'text-primary'),
                 className,
             )}
         >

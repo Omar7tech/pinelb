@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\ManageReservations;
 use App\Filament\Pages\SpotMap;
+use App\Filament\Resources\Spots\Pages\EditSpot;
 use App\Models\Spot;
 use App\Models\User;
 use App\Settings\ReservationSettings;
@@ -66,6 +67,47 @@ it('sends null coordinates for a spot that is not on the map', function (): void
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('spots.0.map_x', null)
             ->where('spots.0.map_y', null));
+});
+
+it('sends the chosen pin colour with the spot', function (): void {
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/plan.png']);
+    Spot::factory()->placedAt()->pinColored('#3b82f6')->create();
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('spots.0.pin_color', '#3b82f6'));
+});
+
+it('sends a null pin colour for a spot left on the default tones', function (): void {
+    Spot::factory()->placedAt()->create();
+
+    $this->get(route('spots.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('spots.0.pin_color', null));
+});
+
+it('saves a pin colour chosen on the spot', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    $spot = Spot::factory()->create();
+
+    Livewire::test(EditSpot::class, ['record' => $spot->getRouteKey()])
+        ->fillForm(['pin_color' => '#3b82f6'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($spot->fresh()->pin_color)->toBe('#3b82f6');
+});
+
+it('hands the pin editor each spot\'s colour', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/plan.png']);
+    Spot::factory()->placedAt()->pinColored('#3b82f6')->create();
+
+    $spots = Livewire::test(SpotMap::class)->assertOk()->instance()->spots;
+
+    expect($spots[0]['pin_color'])->toBe('#3b82f6');
 });
 
 it('renders the pin editor with its spots and saved pins', function (): void {

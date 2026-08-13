@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Spots\Schemas;
 
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -73,6 +74,17 @@ class SpotForm
                             ->helperText('The spot stays on the page but is marked as already taken.')
                             ->default(false)
                             ->inline(false),
+                    ]),
+
+                Section::make('Map pin')
+                    ->description('How this spot is drawn on the floor plan. Place it from Reservations → Spot map.')
+                    ->columnSpanFull()
+                    ->components([
+                        ColorPicker::make('pin_color')
+                            ->label('Pin colour')
+                            ->helperText('Leave empty to keep the default colours — sage while the spot is free, brick once it\'s reserved.')
+                            ->hex()
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

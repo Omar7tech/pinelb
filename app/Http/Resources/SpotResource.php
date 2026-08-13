@@ -31,6 +31,9 @@ class SpotResource extends JsonResource
             // axes means the spot hasn't been placed yet.
             'map_x' => $this->map_x !== null ? (float) $this->map_x : null,
             'map_y' => $this->map_y !== null ? (float) $this->map_y : null,
+            // A colour chosen for this pin, or null to leave it on the default
+            // available/reserved tones.
+            'pin_color' => $this->pin_color,
             'images' => $this->getMedia('images')
                 ->map(fn (Media $media): array => [
                     'id' => $media->id,

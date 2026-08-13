@@ -20,6 +20,8 @@ export type Spot = {
     /** Pin position on the spot map, in percent. Null until it's placed. */
     map_x: number | null;
     map_y: number | null;
+    /** A colour chosen for this pin, or null to keep the reserved/free tones. */
+    pin_color: string | null;
     images: SpotImage[];
 };
 

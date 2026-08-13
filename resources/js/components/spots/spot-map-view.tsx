@@ -336,7 +336,10 @@ export function SpotMapView({
                                             : 'pointer-events-none opacity-30',
                                     )}
                                 >
-                                    <SpotPin reserved={spot.is_reserved} />
+                                    <SpotPin
+                                        reserved={spot.is_reserved}
+                                        color={spot.pin_color}
+                                    />
                                 </button>
                             );
                         })}

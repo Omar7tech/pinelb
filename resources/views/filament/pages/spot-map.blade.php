@@ -144,6 +144,12 @@
                         return '#6b7280';
                     }
 
+                    // A colour set on the spot wins; otherwise the pin reads
+                    // its state, as it does on the storefront.
+                    if (spot.pin_color) {
+                        return spot.pin_color;
+                    }
+
                     return spot.is_reserved ? '#b91c1c' : '#78896c';
                 },
 

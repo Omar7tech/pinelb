@@ -27,6 +27,7 @@ class SpotFactory extends Factory
             'discount_price' => null,
             'map_x' => null,
             'map_y' => null,
+            'pin_color' => null,
         ];
     }
 
@@ -36,6 +37,14 @@ class SpotFactory extends Factory
     public function placedAt(float $x = 50, float $y = 50): static
     {
         return $this->state(fn (): array => ['map_x' => $x, 'map_y' => $y]);
+    }
+
+    /**
+     * A spot whose pin is drawn in its own colour rather than the defaults.
+     */
+    public function pinColored(string $pinColor = '#3b82f6'): static
+    {
+        return $this->state(fn (): array => ['pin_color' => $pinColor]);
     }
 
     /**
