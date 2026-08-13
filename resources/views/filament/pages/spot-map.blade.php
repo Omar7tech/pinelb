@@ -262,7 +262,15 @@
                                     cursor: pointer;
                                 `"
                             >
-                                <span x-text="spot.name"></span>
+                                <span style="display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0;">
+                                    {{-- The same dot the placed list shows, so
+                                         a spot is recognised by its colour
+                                         before it reaches the plan. --}}
+                                    <span
+                                        x-bind:style="`display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: ${pinColor(spot)}; flex: none;`"
+                                    ></span>
+                                    <span x-text="spot.name" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                                </span>
                                 <span
                                     x-show="! spot.is_active"
                                     x-cloak
