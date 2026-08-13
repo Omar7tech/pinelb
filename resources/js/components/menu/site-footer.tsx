@@ -50,7 +50,7 @@ export function SiteFooter({ categories, onSelectCategory }: SiteFooterProps) {
                             <h2 className="mb-3 text-[10px] tracking-[0.22em] text-primary/50 uppercase">
                                 Follow
                             </h2>
-                            <ul className="flex items-center gap-2.5">
+                            <ul className="flex items-center gap-5">
                                 {socials.map((social) => (
                                     <li key={social.platform}>
                                         <a
@@ -59,12 +59,12 @@ export function SiteFooter({ categories, onSelectCategory }: SiteFooterProps) {
                                             rel="noreferrer"
                                             aria-label={social.label}
                                             title={social.label}
-                                            className="flex size-11 items-center justify-center rounded-full border border-primary/20 bg-primary/5 transition-colors hover:border-primary hover:bg-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                            className="block rounded-sm transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background focus-visible:outline-none"
                                         >
                                             <img
                                                 src={social.icon}
                                                 alt=""
-                                                className="size-5"
+                                                className="size-8"
                                             />
                                         </a>
                                     </li>
