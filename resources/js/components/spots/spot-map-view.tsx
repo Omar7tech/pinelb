@@ -300,9 +300,13 @@ export function SpotMapView({
                                 <button
                                     key={spot.id}
                                     type="button"
-                                    onPointerDown={(event) =>
-                                        event.stopPropagation()
-                                    }
+                                    onPointerDown={(event) => {
+                                        // The pin keeps the gesture to itself,
+                                        // so it also has to clear the drag flag
+                                        // the viewport would have cleared.
+                                        event.stopPropagation();
+                                        movedRef.current = false;
+                                    }}
                                     onClick={() => {
                                         if (movedRef.current) {
                                             return;
