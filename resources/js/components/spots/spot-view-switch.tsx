@@ -9,9 +9,10 @@ interface SpotViewSwitchProps {
     onChange: (value: SpotViewMode) => void;
 }
 
+// The map leads, since it's the view the page opens on.
 const OPTIONS = [
-    { value: 'cards', label: 'Cards', icon: LayoutGrid },
     { value: 'map', label: 'Map', icon: Map },
+    { value: 'cards', label: 'Cards', icon: LayoutGrid },
 ] as const satisfies readonly {
     value: SpotViewMode;
     label: string;
@@ -27,7 +28,7 @@ export function SpotViewSwitch({ value, onChange }: SpotViewSwitchProps) {
     return (
         <div
             role="group"
-            aria-label="Switch between cards and the map"
+            aria-label="Switch between the map and the cards"
             className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 p-1"
         >
             {OPTIONS.map((option) => {
