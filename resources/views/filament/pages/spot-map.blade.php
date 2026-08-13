@@ -198,27 +198,42 @@
                                     position: absolute;
                                     left: ${positions[spot.id]?.x ?? 0}%;
                                     top: ${positions[spot.id]?.y ?? 0}%;
-                                    transform: translate(-50%, -100%);
+                                    transform: translate(-50%, -50%);
+                                    width: 0.75rem;
+                                    height: 0.75rem;
                                     padding: 0;
                                     border: 0;
-                                    background: none;
-                                    line-height: 0;
+                                    border-radius: 9999px;
+                                    background: ${pinColor(spot)};
+                                    box-shadow: 0 0 0 2px #ffffff, 0 2px 5px rgba(15, 23, 42, 0.45);
                                     cursor: ${dragId === spot.id ? 'grabbing' : 'grab'};
                                     touch-action: none;
-                                    filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.45));
                                 `"
                             >
-                                {{-- The same teardrop the storefront draws, tip
-                                     on the point, so both views agree. --}}
-                                <svg viewBox="0 0 24 34" style="display: block; height: 2.25rem; width: auto;">
-                                    <path
-                                        d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
-                                        x-bind:fill="pinColor(spot)"
-                                        stroke="#ffffff"
-                                        stroke-width="1.5"
-                                    />
-                                    <circle cx="12" cy="11.5" r="4" fill="#ffffff" />
-                                </svg>
+                                {{-- The same marker the storefront draws: the
+                                     dot on the point, its name under it, so both
+                                     views agree. The name hangs off the dot
+                                     rather than sitting in its flow, so a long
+                                     one can't drag the dot off the point. --}}
+                                <span
+                                    x-text="spot.name"
+                                    style="
+                                        position: absolute;
+                                        top: 100%;
+                                        left: 50%;
+                                        transform: translateX(-50%);
+                                        margin-top: 0.25rem;
+                                        padding: 0.0625rem 0.375rem;
+                                        border-radius: 9999px;
+                                        background: rgba(255, 255, 255, 0.85);
+                                        color: #18181b;
+                                        font-size: 0.625rem;
+                                        font-weight: 500;
+                                        line-height: 1.4;
+                                        white-space: nowrap;
+                                        pointer-events: none;
+                                    "
+                                ></span>
                             </button>
                         </template>
                     </div>

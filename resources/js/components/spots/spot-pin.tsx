@@ -5,36 +5,36 @@ interface SpotPinProps {
     reserved: boolean;
     /** A colour chosen for this pin, which overrides the two tones above. */
     color?: string | null;
+    /** Written under the dot, so a spot is read without opening it. */
+    name?: string;
     className?: string;
 }
 
 /**
- * The map marker: a teardrop whose tip is the spot's exact position, so the
- * same coordinates land in the same place in the admin editor and here. Drawn
- * on a 24×34 canvas with the tip at (12, 34) — anchor it with `translate(-50%,
- * -100%)` and the tip sits on the point.
+ * The map marker: a small dot sitting on the spot's exact position, with the
+ * spot's name under it. The dot is the anchor — centre it on the point with
+ * `translate(-50%, -50%)` and it lands where the admin editor placed it.
+ *
+ * The name hangs off the dot rather than sitting in its flow, so a long one
+ * can't drag the dot off the point.
  */
-export function SpotPin({ reserved, color, className }: SpotPinProps) {
+export function SpotPin({ reserved, color, name, className }: SpotPinProps) {
     return (
-        <svg
-            viewBox="0 0 24 34"
-            aria-hidden
-            style={color ? { color } : undefined}
+        <span
+            style={color ? { backgroundColor: color } : undefined}
             className={cn(
-                'h-9 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)]',
+                'relative block size-3 rounded-full ring-2 shadow-[0_2px_5px_rgba(15,23,42,0.45)] ring-background',
                 // The chosen colour is carried by the inline style, so the
                 // state tone is only asked for when there isn't one.
-                !color && (reserved ? 'text-brick' : 'text-primary'),
+                !color && (reserved ? 'bg-brick' : 'bg-primary'),
                 className,
             )}
         >
-            <path
-                d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
-                fill="currentColor"
-                stroke="var(--color-background)"
-                strokeWidth="1.5"
-            />
-            <circle cx="12" cy="11.5" r="4" fill="var(--color-background)" />
-        </svg>
+            {name && (
+                <span className="pointer-events-none absolute top-full left-1/2 mt-1 -translate-x-1/2 rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm">
+                    {name}
+                </span>
+            )}
+        </span>
     );
 }

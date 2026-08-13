@@ -34,9 +34,9 @@ function isPlaced(spot: Spot): spot is Spot & { map_x: number; map_y: number } {
  * Nothing is laid over the plan itself: on a phone every control is a thumb in
  * the way, so the gestures carry the zoom and the frame stays clean.
  *
- * Coordinates are percentages of the image box, and every pin hangs by its tip
- * from that point, exactly as the admin editor places it. Pins are
- * counter-scaled so they keep their size — and their tip — at any zoom.
+ * Coordinates are percentages of the image box, and every pin's dot is centred
+ * on that point, exactly as the admin editor places it. Pins are
+ * counter-scaled so they keep their size — and their place — at any zoom.
  */
 export function SpotMapView({
     spots,
@@ -323,14 +323,14 @@ export function SpotMapView({
                                     style={{
                                         left: `${spot.map_x}%`,
                                         top: `${spot.map_y}%`,
-                                        // The pin hangs by its tip from the
-                                        // point, and shrugs off the zoom so it
-                                        // keeps both its size and its tip.
-                                        transform: `translate(-50%, -100%) scale(${1 / scale})`,
-                                        transformOrigin: 'bottom center',
+                                        // The dot sits on the point, and shrugs
+                                        // off the zoom so it keeps both its size
+                                        // and its place.
+                                        transform: `translate(-50%, -50%) scale(${1 / scale})`,
+                                        transformOrigin: 'center',
                                     }}
                                     className={cn(
-                                        'absolute origin-bottom transition-opacity duration-200',
+                                        'absolute transition-opacity duration-200',
                                         matches
                                             ? 'cursor-pointer opacity-100 hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
                                             : 'pointer-events-none opacity-30',
@@ -339,6 +339,7 @@ export function SpotMapView({
                                     <SpotPin
                                         reserved={spot.is_reserved}
                                         color={spot.pin_color}
+                                        name={spot.name}
                                     />
                                 </button>
                             );
