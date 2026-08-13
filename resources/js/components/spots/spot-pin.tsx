@@ -12,17 +12,22 @@ interface SpotPinProps {
     className?: string;
 }
 
+/** The name, hung under the marker so a long one can't shift its anchor. */
+function PinLabel({ name }: { name: string }) {
+    return (
+        <span className="pointer-events-none absolute top-full left-1/2 mt-1 -translate-x-1/2 rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm">
+            {name}
+        </span>
+    );
+}
+
 /**
- * The map marker: a small shape sitting on the spot's exact position, with the
- * spot's name under it. The shape is the anchor — centre it on the point with
- * `translate(-50%, -50%)` and it lands where the admin editor placed it.
+ * The map marker, with the spot's name under it.
  *
- * A bookable spot is a round dot; a landmark is a diamond, so the two are told
- * apart by shape rather than colour alone — the colour is the admin's to
- * choose, the shape isn't.
- *
- * The name hangs off the shape rather than sitting in its flow, so a long one
- * can't drag the marker off the point.
+ * A bookable spot is a teardrop hanging by its tip from the point — anchor it
+ * with `translate(-50%, -100%)`. A landmark is a small diamond centred on the
+ * point instead — `translate(-50%, -50%)` — so the two are told apart by shape
+ * rather than colour alone, since the colour is the admin's to choose.
  */
 export function SpotPin({
     reserved,
@@ -31,29 +36,50 @@ export function SpotPin({
     name,
     className,
 }: SpotPinProps) {
+    if (landmark) {
+        return (
+            <span className={cn('relative block size-3', className)}>
+                <span
+                    style={color ? { backgroundColor: color } : undefined}
+                    className={cn(
+                        'absolute inset-0 rotate-45 rounded-[2px] shadow-[0_2px_5px_rgba(15,23,42,0.45)] ring-2 ring-background',
+                        !color && 'bg-slate-500',
+                    )}
+                />
+
+                {name && <PinLabel name={name} />}
+            </span>
+        );
+    }
+
     return (
-        <span className={cn('relative block size-3', className)}>
-            <span
-                style={color ? { backgroundColor: color } : undefined}
+        <span className={cn('relative block', className)}>
+            <svg
+                viewBox="0 0 24 34"
+                aria-hidden
+                style={color ? { color } : undefined}
                 className={cn(
-                    'absolute inset-0 shadow-[0_2px_5px_rgba(15,23,42,0.45)] ring-2 ring-background',
-                    landmark ? 'rotate-45 rounded-[2px]' : 'rounded-full',
+                    'block h-9 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)]',
                     // The chosen colour is carried by the inline style, so the
                     // state tone is only asked for when there isn't one.
-                    !color &&
-                        (landmark
-                            ? 'bg-slate-500'
-                            : reserved
-                              ? 'bg-brick'
-                              : 'bg-primary'),
+                    !color && (reserved ? 'text-brick' : 'text-primary'),
                 )}
-            />
+            >
+                <path
+                    d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
+                    fill="currentColor"
+                    stroke="var(--color-background)"
+                    strokeWidth="1.5"
+                />
+                <circle
+                    cx="12"
+                    cy="11.5"
+                    r="4"
+                    fill="var(--color-background)"
+                />
+            </svg>
 
-            {name && (
-                <span className="pointer-events-none absolute top-full left-1/2 mt-1.5 -translate-x-1/2 rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm">
-                    {name}
-                </span>
-            )}
+            {name && <PinLabel name={name} />}
         </span>
     );
 }

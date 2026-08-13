@@ -34,9 +34,9 @@ function isPlaced(spot: Spot): spot is Spot & { map_x: number; map_y: number } {
  * Nothing is laid over the plan itself: on a phone every control is a thumb in
  * the way, so the gestures carry the zoom and the frame stays clean.
  *
- * Coordinates are percentages of the image box, and every pin's dot is centred
- * on that point, exactly as the admin editor places it. Pins are
- * counter-scaled so they keep their size — and their place — at any zoom.
+ * Coordinates are percentages of the image box, and every marker sits on that
+ * point exactly as the admin editor places it. Markers are counter-scaled so
+ * they keep their size — and their place — at any zoom.
  */
 export function SpotMapView({
     spots,
@@ -335,11 +335,16 @@ export function SpotMapView({
                                     style={{
                                         left: `${spot.map_x}%`,
                                         top: `${spot.map_y}%`,
-                                        // The dot sits on the point, and shrugs
-                                        // off the zoom so it keeps both its size
-                                        // and its place.
-                                        transform: `translate(-50%, -50%) scale(${1 / scale})`,
-                                        transformOrigin: 'center',
+                                        // The pin hangs by its tip from the
+                                        // point and a landmark's diamond sits
+                                        // centred on it, and both shrug off the
+                                        // zoom so they keep their size.
+                                        transform: landmark
+                                            ? `translate(-50%, -50%) scale(${1 / scale})`
+                                            : `translate(-50%, -100%) scale(${1 / scale})`,
+                                        transformOrigin: landmark
+                                            ? 'center'
+                                            : 'bottom center',
                                     }}
                                     className={cn(
                                         'absolute transition-opacity duration-200',
