@@ -77,43 +77,49 @@ export function SpotDialog({
                 </div>
 
                 {/* Fixed footer: the price and action stay visible however long
-                    the copy runs. */}
-                <div className="flex shrink-0 items-center justify-between gap-3 border-t border-primary/15 bg-primary/5 px-5 py-4">
-                    {/* A spot quoted on request carries no price; the reserve
+                    the copy runs. A landmark books nothing, so it keeps the
+                    photos and the copy and drops the footer entirely. */}
+                {spot.is_reservable && (
+                    <div className="flex shrink-0 items-center justify-between gap-3 border-t border-primary/15 bg-primary/5 px-5 py-4">
+                        {/* A spot quoted on request carries no price; the reserve
                         action then stands on its own. */}
-                    {spot.price !== null ? (
-                        <ProductPrice
-                            basePrice={spot.price}
-                            discountPrice={spot.discount_price}
-                            size="lg"
-                        />
-                    ) : (
-                        <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
-                            Price on request
-                        </span>
-                    )}
+                        {spot.price !== null ? (
+                            <ProductPrice
+                                basePrice={spot.price}
+                                discountPrice={spot.discount_price}
+                                size="lg"
+                            />
+                        ) : (
+                            <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
+                                Price on request
+                            </span>
+                        )}
 
-                    {spot.is_reserved ? (
-                        <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
-                            Not available
-                        </span>
-                    ) : (
-                        contactNumber && (
-                            <a
-                                href={buildWhatsAppUrl(
-                                    contactNumber,
-                                    `Hi! I'd like to reserve "${spot.name}".`,
-                                )}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm tracking-wide text-primary-foreground uppercase transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                            >
-                                <CalendarCheck aria-hidden className="size-4" />
-                                Reserve
-                            </a>
-                        )
-                    )}
-                </div>
+                        {spot.is_reserved ? (
+                            <span className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
+                                Not available
+                            </span>
+                        ) : (
+                            contactNumber && (
+                                <a
+                                    href={buildWhatsAppUrl(
+                                        contactNumber,
+                                        `Hi! I'd like to reserve "${spot.name}".`,
+                                    )}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm tracking-wide text-primary-foreground uppercase transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    <CalendarCheck
+                                        aria-hidden
+                                        className="size-4"
+                                    />
+                                    Reserve
+                                </a>
+                            )
+                        )}
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );

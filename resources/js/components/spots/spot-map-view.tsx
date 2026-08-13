@@ -296,34 +296,15 @@ export function SpotMapView({
 
                         {placed.map((spot) => {
                             // A landmark answers "where is the WC", so it stays
-                            // legible on both sides of the filter — and there is
-                            // nothing to open behind it.
-                            if (!spot.is_reservable) {
-                                return (
-                                    <span
-                                        key={spot.id}
-                                        style={{
-                                            left: `${spot.map_x}%`,
-                                            top: `${spot.map_y}%`,
-                                            transform: `translate(-50%, -50%) scale(${1 / scale})`,
-                                            transformOrigin: 'center',
-                                        }}
-                                        className="pointer-events-none absolute"
-                                    >
-                                        <SpotPin
-                                            reserved={false}
-                                            landmark
-                                            color={spot.pin_color}
-                                            name={spot.name}
-                                        />
-                                    </span>
-                                );
-                            }
-
+                            // legible on both sides of the filter. It opens like
+                            // any other pin — on its photos and its copy, with
+                            // nothing to book.
+                            const landmark = !spot.is_reservable;
                             const matches =
-                                filter === 'reserved'
+                                landmark ||
+                                (filter === 'reserved'
                                     ? spot.is_reserved
-                                    : !spot.is_reserved;
+                                    : !spot.is_reserved);
 
                             return (
                                 <button
@@ -345,9 +326,11 @@ export function SpotMapView({
                                     }}
                                     disabled={!matches}
                                     aria-label={`${spot.name} — ${
-                                        spot.is_reserved
-                                            ? 'reserved'
-                                            : 'available'
+                                        landmark
+                                            ? 'facility'
+                                            : spot.is_reserved
+                                              ? 'reserved'
+                                              : 'available'
                                     }`}
                                     style={{
                                         left: `${spot.map_x}%`,
@@ -367,6 +350,7 @@ export function SpotMapView({
                                 >
                                     <SpotPin
                                         reserved={spot.is_reserved}
+                                        landmark={landmark}
                                         color={spot.pin_color}
                                         name={spot.name}
                                     />
