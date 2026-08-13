@@ -2,15 +2,13 @@
 
 namespace App\Filament\Resources\Spots\Tables;
 
+use App\Filament\Resources\Spots\Pages\ListSpots;
 use App\Filament\Tables\Columns\PriceColumn;
-use App\Models\Spot;
 use App\Settings\GeneralSettings;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
@@ -24,6 +22,10 @@ class SpotsTable
     {
         // Null hides the LBP line, matching the storefront's fallback to USD.
         $lbpRate = app(GeneralSettings::class)->usableLbpRate();
+
+        // The tabs already split the two kinds apart, so the booking columns
+        // and filters are only worth showing on the side that books.
+        $bookable = fn (ListSpots $livewire): bool => $livewire->activeTab !== 'landmarks';
 
         return $table
             ->reorderable('sort_order')
@@ -43,24 +45,15 @@ class SpotsTable
                 PriceColumn::make('price')
                     ->label('Price')
                     ->sortable()
-                    ->lbpRate($lbpRate),
-                IconColumn::make('is_reservable')
-                    ->label('Bookable')
-                    ->boolean()
-                    ->trueIcon(Heroicon::OutlinedCalendarDays)
-                    ->falseIcon(Heroicon::OutlinedMapPin)
-                    ->falseColor('gray')
-                    ->tooltip(fn (Spot $record): string => $record->is_reservable ? 'Bookable spot' : 'Landmark — map only')
-                    ->sortable(),
+                    ->lbpRate($lbpRate)
+                    ->visible($bookable),
                 ToggleColumn::make('is_active')
                     ->label('Active')
                     ->sortable(),
                 ToggleColumn::make('is_reserved')
                     ->label('Reserved')
-                    // A landmark is never taken, so its toggle would say
-                    // nothing.
-                    ->disabled(fn (Spot $record): bool => ! $record->is_reservable)
-                    ->sortable(),
+                    ->sortable()
+                    ->visible($bookable),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -71,13 +64,10 @@ class SpotsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TernaryFilter::make('is_reservable')
-                    ->label('Bookable')
-                    ->placeholder('All spots')
-                    ->trueLabel('Bookable spots')
-                    ->falseLabel('Landmarks'),
                 TernaryFilter::make('is_active')->label('Active'),
-                TernaryFilter::make('is_reserved')->label('Reserved'),
+                TernaryFilter::make('is_reserved')
+                    ->label('Reserved')
+                    ->visible($bookable),
                 TernaryFilter::make('discount_price')
                     ->label('Discount')
                     ->placeholder('All spots')
@@ -87,7 +77,8 @@ class SpotsTable
                         true: fn (Builder $query): Builder => $query->whereNotNull('discount_price'),
                         false: fn (Builder $query): Builder => $query->whereNull('discount_price'),
                         blank: fn (Builder $query): Builder => $query,
-                    ),
+                    )
+                    ->visible($bookable),
             ])
             ->filtersFormColumns(2)
             ->recordActions([

@@ -215,6 +215,22 @@ it('creates a spot without a price', function (): void {
     expect(Spot::where('name', 'Quoted table')->value('price'))->toBeNull();
 });
 
+it('keeps the booking entries off a landmark\'s view page', function (): void {
+    $landmark = Spot::factory()->landmark()->create();
+
+    Livewire::test(ViewSpot::class, ['record' => $landmark->getRouteKey()])
+        ->assertOk()
+        ->assertSee('Landmark')
+        ->assertDontSee('Discount price')
+        ->assertDontSee('Reserved');
+
+    Livewire::test(ViewSpot::class, ['record' => $this->spot->getRouteKey()])
+        ->assertOk()
+        ->assertSee('Bookable spot')
+        ->assertSee('Discount price')
+        ->assertSee('Reserved');
+});
+
 it('creates a landmark that carries no price or reservation', function (): void {
     Livewire::test(CreateSpot::class)
         ->fillForm([
@@ -235,9 +251,9 @@ it('splits the spot list into bookable spots and landmarks', function (): void {
     Spot::factory()->create(['name' => 'Fireplace table']);
     Spot::factory()->landmark()->create(['name' => 'Playground']);
 
+    // The list opens on the spots customers book.
     Livewire::test(ListSpots::class)
-        ->assertCanSeeTableRecords(Spot::all())
-        ->set('activeTab', 'bookable')
+        ->assertCanSeeTableRecords(Spot::where('is_reservable', true)->get())
         ->assertCanNotSeeTableRecords(Spot::where('is_reservable', false)->get())
         ->set('activeTab', 'landmarks')
         ->assertCanSeeTableRecords(Spot::where('is_reservable', false)->get())

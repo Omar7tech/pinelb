@@ -24,6 +24,16 @@ class SpotForm
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->inline(false),
+                        Toggle::make('is_reservable')
+                            ->label('Bookable')
+                            ->helperText('Turn off for a landmark customers only read the map by — the parking, the WC, the playground. It keeps its pin and name, and drops everything about booking.')
+                            ->default(true)
+                            ->columnSpanFull()
+                            ->inline(false),
                         Textarea::make('description')
                             ->rows(3)
                             ->columnSpanFull(),
@@ -51,45 +61,33 @@ class SpotForm
                             ->columnSpanFull(),
                     ]),
 
+                // Everything about booking, which a landmark has no use for.
                 Section::make('Pricing & status')
                     ->columnSpanFull()
                     ->columns(2)
+                    ->visibleJs(<<<'JS'
+                        $get('is_reservable')
+                        JS)
                     ->components([
-                        Toggle::make('is_reservable')
-                            ->label('Bookable')
-                            ->helperText('Turn off for a landmark customers only read the map by — the parking, the WC, the playground. It keeps its pin and name, but no price and no reserve button.')
-                            ->default(true)
-                            ->columnSpanFull()
-                            ->inline(false),
-
                         TextInput::make('price')
                             ->helperText('Leave empty to list the spot without a price.')
                             ->numeric()
                             ->minValue(0)
-                            ->prefix('$')
-                            ->visibleJs(<<<'JS'
-                                $get('is_reservable')
-                                JS),
+                            ->prefix('$'),
                         TextInput::make('discount_price')
                             ->numeric()
                             ->minValue(0)
                             ->lte('price')
                             ->prefix('$')
                             ->visibleJs(<<<'JS'
-                                $get('is_reservable') && $get('price')
+                                $get('price')
                                 JS),
-                        Toggle::make('is_active')
-                            ->label('Active')
-                            ->default(true)
-                            ->inline(false),
                         Toggle::make('is_reserved')
                             ->label('Reserved')
                             ->helperText('The spot stays on the page but is marked as already taken.')
                             ->default(false)
-                            ->inline(false)
-                            ->visibleJs(<<<'JS'
-                                $get('is_reservable')
-                                JS),
+                            ->columnSpanFull()
+                            ->inline(false),
                     ]),
 
                 Section::make('Map pin')

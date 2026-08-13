@@ -29,9 +29,6 @@ class ListSpots extends ListRecords
     public function getTabs(): array
     {
         return [
-            'all' => Tab::make('All')
-                ->badge(Spot::query()->count()),
-
             'bookable' => Tab::make('Bookable')
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_reservable', true))
                 ->badge(Spot::query()->where('is_reservable', true)->count()),
@@ -40,5 +37,11 @@ class ListSpots extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query): Builder => $query->where('is_reservable', false))
                 ->badge(Spot::query()->where('is_reservable', false)->count()),
         ];
+    }
+
+    /** The spots customers book are the ones the list is usually opened for. */
+    public function getDefaultActiveTab(): string|int|null
+    {
+        return 'bookable';
     }
 }
