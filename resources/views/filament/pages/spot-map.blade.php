@@ -209,18 +209,29 @@
                                     height: 0.75rem;
                                     padding: 0;
                                     border: 0;
-                                    border-radius: 9999px;
-                                    background: ${pinColor(spot)};
-                                    box-shadow: 0 0 0 2px #ffffff, 0 2px 5px rgba(15, 23, 42, 0.45);
+                                    background: none;
                                     cursor: ${dragId === spot.id ? 'grabbing' : 'grab'};
                                     touch-action: none;
                                 `"
                             >
-                                {{-- The same marker the storefront draws: the
-                                     dot on the point, its name under it, so both
-                                     views agree. The name hangs off the dot
-                                     rather than sitting in its flow, so a long
-                                     one can't drag the dot off the point. --}}
+                                {{-- The same marker the storefront draws, so
+                                     both views agree: a round dot for a bookable
+                                     spot, a diamond for a landmark, told apart
+                                     by shape rather than colour alone. --}}
+                                <span
+                                    x-bind:style="`
+                                        position: absolute;
+                                        inset: 0;
+                                        background: ${pinColor(spot)};
+                                        border-radius: ${spot.is_reservable ? '9999px' : '2px'};
+                                        transform: ${spot.is_reservable ? 'none' : 'rotate(45deg)'};
+                                        box-shadow: 0 0 0 2px #ffffff, 0 2px 5px rgba(15, 23, 42, 0.45);
+                                    `"
+                                ></span>
+
+                                {{-- The name hangs off the marker rather than
+                                     sitting in its flow, so a long one can't
+                                     drag the marker off the point. --}}
                                 <span
                                     x-text="spot.name"
                                     style="
@@ -228,7 +239,7 @@
                                         top: 100%;
                                         left: 50%;
                                         transform: translateX(-50%);
-                                        margin-top: 0.25rem;
+                                        margin-top: 0.375rem;
                                         padding: 0.0625rem 0.375rem;
                                         border-radius: 9999px;
                                         background: rgba(255, 255, 255, 0.85);
@@ -262,9 +273,20 @@
                 {{-- What each pin colour means, so the plan is read without
                      opening a single spot. --}}
                 <div style="display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.75;">
-                    @foreach ([['#78896c', 'Free'], ['#b91c1c', 'Reserved'], ['#64748b', 'Landmark'], ['#6b7280', 'Hidden']] as [$color, $label])
+                    @foreach ([['#78896c', 'Free', true], ['#b91c1c', 'Reserved', true], ['#64748b', 'Landmark', false], ['#6b7280', 'Hidden', true]] as [$color, $label, $isRound])
                         <span style="display: inline-flex; align-items: center; gap: 0.375rem;">
-                            <span style="display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: {{ $color }};"></span>
+                            {{-- The swatch carries the marker's shape as well as
+                                 its colour, so the key matches the plan. --}}
+                            <span
+                                style="
+                                    display: inline-block;
+                                    width: 0.5rem;
+                                    height: 0.5rem;
+                                    background: {{ $color }};
+                                    border-radius: {{ $isRound ? '9999px' : '1px' }};
+                                    transform: {{ $isRound ? 'none' : 'rotate(45deg)' }};
+                                "
+                            ></span>
                             {{ $label }}
                         </span>
                     @endforeach

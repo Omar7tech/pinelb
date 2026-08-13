@@ -389,7 +389,9 @@ export function SpotMapView({
                     </span>
                     {placed.some((spot) => !spot.is_reservable) && (
                         <span className="inline-flex items-center gap-1.5">
-                            <span className="size-2.5 rounded-full bg-slate-500" />
+                            {/* The swatch carries the marker's shape as well as
+                                its colour, so the key matches the map. */}
+                            <span className="size-2 rotate-45 rounded-[1px] bg-slate-500" />
                             Facilities
                         </span>
                     )}
