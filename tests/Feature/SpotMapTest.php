@@ -7,6 +7,7 @@ use App\Models\Spot;
 use App\Models\User;
 use App\Settings\ReservationSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia;
 use Livewire\Livewire;
@@ -176,6 +177,70 @@ it('saves the map settings from the reservation page', function (): void {
         ->assertHasNoFormErrors();
 
     expect(app(ReservationSettings::class)->refresh()->map_is_active)->toBeFalse();
+});
+
+it('deletes the map image it replaces', function (): void {
+    $this->actingAs(User::factory()->create());
+    Storage::fake('public');
+    Storage::disk('public')->put('spot-map/old.png', 'old');
+
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/old.png']);
+
+    Livewire::test(ManageReservations::class)
+        ->fillForm([
+            'is_active' => true,
+            'phone_number' => '+96171387946',
+            'map_is_active' => true,
+            'map_image' => [UploadedFile::fake()->image('new.png')],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $saved = app(ReservationSettings::class)->refresh()->map_image;
+
+    Storage::disk('public')->assertMissing('spot-map/old.png');
+    expect($saved)->not->toBe('spot-map/old.png');
+    Storage::disk('public')->assertExists($saved);
+});
+
+it('deletes the map image when it is cleared', function (): void {
+    $this->actingAs(User::factory()->create());
+    Storage::fake('public');
+    Storage::disk('public')->put('spot-map/old.png', 'old');
+
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/old.png']);
+
+    Livewire::test(ManageReservations::class)
+        ->fillForm([
+            'is_active' => true,
+            'phone_number' => '+96171387946',
+            'map_is_active' => false,
+            'map_image' => null,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Storage::disk('public')->assertMissing('spot-map/old.png');
+});
+
+it('keeps the map image when the settings are saved unchanged', function (): void {
+    $this->actingAs(User::factory()->create());
+    Storage::fake('public');
+    Storage::disk('public')->put('spot-map/plan.png', 'plan');
+
+    mapSettings(['map_is_active' => true, 'map_image' => 'spot-map/plan.png']);
+
+    Livewire::test(ManageReservations::class)
+        ->fillForm([
+            'is_active' => true,
+            'phone_number' => '+96171387946',
+            'map_is_active' => true,
+            'map_image' => ['plan' => 'spot-map/plan.png'],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    Storage::disk('public')->assertExists('spot-map/plan.png');
 });
 
 it('requires a map image while the map view is enabled', function (): void {

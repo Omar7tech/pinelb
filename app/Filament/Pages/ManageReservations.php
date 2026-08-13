@@ -11,6 +11,7 @@ use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
 use UnitEnum;
 
 /**
@@ -29,6 +30,25 @@ class ManageReservations extends SettingsPage
     protected static ?int $navigationSort = 2;
 
     protected static string $settings = ReservationSettings::class;
+
+    /**
+     * Filament leaves an upload it no longer points at on the disk, so a map
+     * that has been replaced or cleared is swept up here — once the save is
+     * actually going through, and only ever the file the settings were holding.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $previous = app(ReservationSettings::class)->refresh()->map_image;
+
+        if (filled($previous) && $previous !== ($data['map_image'] ?? null)) {
+            Storage::disk('public')->delete($previous);
+        }
+
+        return $data;
+    }
 
     public function form(Schema $schema): Schema
     {
