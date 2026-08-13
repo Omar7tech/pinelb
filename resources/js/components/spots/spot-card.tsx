@@ -48,16 +48,27 @@ function SpotCardComponent({ spot }: SpotCardProps) {
                     <span className="sr-only">View {spot.name}</span>
                 </button>
 
-                <div className="pointer-events-none relative">
-                    <SpotCover images={spot.images} name={spot.name} />
+                {/* Without a photo the badge has nothing to sit on, so it leads
+                    the card instead of floating over an empty box. */}
+                {spot.images.length > 0 ? (
+                    <div className="pointer-events-none relative">
+                        <SpotCover images={spot.images} name={spot.name} />
 
-                    {spot.is_reserved && (
-                        <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase">
+                        {spot.is_reserved && (
+                            <span className="absolute top-2 left-2 z-10 inline-flex items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase">
+                                <Lock aria-hidden className="size-3" />
+                                Reserved
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    spot.is_reserved && (
+                        <span className="pointer-events-none inline-flex w-fit items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase">
                             <Lock aria-hidden className="size-3" />
                             Reserved
                         </span>
-                    )}
-                </div>
+                    )
+                )}
 
                 <div className="pointer-events-none mt-3 flex min-w-0 flex-1 flex-col">
                     <h2

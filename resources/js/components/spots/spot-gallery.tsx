@@ -1,7 +1,6 @@
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { PineMark } from '@/components/pine-logo';
 import { SmartImage } from '@/components/smart-image';
 import { cn } from '@/lib/utils';
 import type { SpotImage } from '@/types';
@@ -16,7 +15,7 @@ interface SpotGalleryProps {
 /**
  * The photo strip at the top of a spot card. A single photo renders as a plain
  * image; several become a looping, draggable carousel with arrows and dots.
- * With no photos at all the pine mark stands in.
+ * With no photos at all it draws nothing, rather than holding a stand-in open.
  */
 export function SpotGallery({ images, name, className }: SpotGalleryProps) {
     const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
@@ -48,17 +47,7 @@ export function SpotGallery({ images, name, className }: SpotGalleryProps) {
     );
 
     if (images.length === 0) {
-        return (
-            <span
-                aria-hidden
-                className={cn(
-                    'grid aspect-[4/3] w-full place-items-center rounded-[1.15rem] bg-primary/5',
-                    className,
-                )}
-            >
-                <PineMark className="h-2/5 w-auto text-primary/25" />
-            </span>
-        );
+        return null;
     }
 
     if (images.length === 1) {

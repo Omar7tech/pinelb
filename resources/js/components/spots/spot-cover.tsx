@@ -1,5 +1,4 @@
 import { Images } from 'lucide-react';
-import { PineMark } from '@/components/pine-logo';
 import { SmartImage } from '@/components/smart-image';
 import { cn } from '@/lib/utils';
 import type { SpotImage } from '@/types';
@@ -15,22 +14,15 @@ interface SpotCoverProps {
  * The still photo at the top of a spot card: the first image only, with a badge
  * hinting at the rest. The full, swipeable gallery lives in the details dialog
  * so the card itself stays a single tap target.
+ *
+ * A spot without photos draws nothing at all — the card closes up around its
+ * name rather than holding a stand-in open.
  */
 export function SpotCover({ images, name, className }: SpotCoverProps) {
     const cover = images[0];
 
     if (!cover) {
-        return (
-            <span
-                aria-hidden
-                className={cn(
-                    'grid aspect-[4/3] w-full place-items-center rounded-[1.15rem] bg-primary/5',
-                    className,
-                )}
-            >
-                <PineMark className="h-2/5 w-auto text-primary/25" />
-            </span>
-        );
+        return null;
     }
 
     return (

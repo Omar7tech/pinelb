@@ -32,28 +32,45 @@ export function SpotDialog({
 }: SpotDialogProps) {
     // Right-align and flip the text block to RTL when the name is Arabic.
     const rtl = isArabic(spot.name);
+    const hasImages = spot.images.length > 0;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             {/* The panel itself doesn't scroll: the gallery and price footer stay
                 put and only the middle column scrolls. */}
             <DialogContent className="gap-0 overflow-y-hidden p-0">
-                <div className="relative shrink-0 p-4 pt-2 sm:pt-4">
-                    <SpotGallery
-                        images={spot.images}
-                        name={spot.name}
-                        className="border border-primary/15"
-                    />
+                {/* A spot without photos opens straight on its name — the badge
+                    then leads the copy rather than floating over nothing. */}
+                {hasImages && (
+                    <div className="relative shrink-0 p-4 pt-2 sm:pt-4">
+                        <SpotGallery
+                            images={spot.images}
+                            name={spot.name}
+                            className="border border-primary/15"
+                        />
 
-                    {spot.is_reserved && (
-                        <span className="absolute top-4 left-6 z-10 inline-flex items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase sm:top-6">
+                        {spot.is_reserved && (
+                            <span className="absolute top-4 left-6 z-10 inline-flex items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase sm:top-6">
+                                <Lock aria-hidden className="size-3" />
+                                Reserved
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                <div
+                    className={cn(
+                        'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 pb-5',
+                        !hasImages && 'pt-5',
+                    )}
+                >
+                    {!hasImages && spot.is_reserved && (
+                        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brick px-3 py-1 text-[10px] tracking-[0.16em] text-primary-foreground uppercase">
                             <Lock aria-hidden className="size-3" />
                             Reserved
                         </span>
                     )}
-                </div>
 
-                <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-5 pb-5">
                     <DialogHeader className="shrink-0">
                         <DialogTitle
                             dir={rtl ? 'rtl' : undefined}
