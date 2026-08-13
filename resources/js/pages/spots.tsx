@@ -40,7 +40,17 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
         counts.available > 0 ? 'available' : 'reserved',
     );
 
-    const [view, setView] = useState<SpotViewMode>('cards');
+    // The map is only offered once it's switched on and something is pinned to
+    // it; otherwise the page stays on cards with no switch at all.
+    const mapAvailable =
+        mapImage !== null &&
+        spots.some((spot) => spot.map_x !== null && spot.map_y !== null);
+
+    // The plan reads the room at a glance, so it leads whenever it's offered;
+    // the cards are a switch away.
+    const [view, setView] = useState<SpotViewMode>(
+        mapAvailable ? 'map' : 'cards',
+    );
 
     // The spot behind the details dialog opened from a map pin. In card mode
     // each card owns its own dialog, so this stays null.
@@ -56,11 +66,6 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
         [spots, filter],
     );
 
-    // The map is only offered once it's switched on and something is pinned to
-    // it; otherwise the page stays on cards with no switch at all.
-    const mapAvailable =
-        mapImage !== null &&
-        spots.some((spot) => spot.map_x !== null && spot.map_y !== null);
     const showingMap = mapAvailable && view === 'map';
 
     return (
