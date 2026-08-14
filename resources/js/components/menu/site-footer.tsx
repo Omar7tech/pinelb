@@ -84,7 +84,9 @@ export function SiteFooter({ categories, onSelectCategory }: SiteFooterProps) {
                 src="/logos/meet-me-under-the-pines-transparent.png"
                 alt="Meet me under the pines."
                 draggable={false}
-                className="mx-auto -mb-4 w-full max-w-[15rem] select-none sm:-mb-6 sm:max-w-xs md:max-w-sm"
+                // Decorative, so it takes no pointer at all: nothing to drag
+                // off the page, and nothing to catch a tap meant for the trees.
+                className="pointer-events-none mx-auto -mb-4 w-full max-w-[15rem] select-none sm:-mb-6 sm:max-w-xs md:max-w-sm"
             />
 
             <Treeline />
