@@ -29,7 +29,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('8142026-admin')
             ->login()
             ->maxContentWidth(Width::Full)
             ->sidebarCollapsibleOnDesktop()
