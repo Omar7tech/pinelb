@@ -1,6 +1,12 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
-import { Bike, CalendarCheck, MapPin, UtensilsCrossed } from 'lucide-react';
+import {
+    Bike,
+    CalendarCheck,
+    MapPin,
+    Phone,
+    UtensilsCrossed,
+} from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
@@ -50,7 +56,13 @@ function HeroButton({
         >
             {interactive ? (
                 external ? (
-                    <a href={href} target="_blank" rel="noreferrer">
+                    // A map link leaves the site and so opens in a new tab; a
+                    // `tel:` hands off to the phone and must stay in place.
+                    <a
+                        href={href}
+                        target={href.startsWith('http') ? '_blank' : undefined}
+                        rel={href.startsWith('http') ? 'noreferrer' : undefined}
+                    >
                         <HeroButtonBody icon={Icon} label={label} />
                     </a>
                 ) : (
@@ -157,19 +169,36 @@ export default function Welcome() {
                                         ? undefined
                                         : 'Reservations are currently unavailable'
                                 }
-                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto"
+                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto sm:px-6"
                             />
 
-                            {location.mapUrl && (
-                                <HeroButton
-                                    icon={MapPin}
-                                    label="Find us"
-                                    href={location.mapUrl}
-                                    external
-                                    title="Open our location on the map"
-                                    className="sm:w-auto"
-                                />
-                            )}
+                            {/* The two ways to reach us share a line of their
+                                own on a phone, and join the reservation on one
+                                line from `sm` — `contents` drops this box out
+                                of the layout there. */}
+                            <div className="flex gap-3 sm:contents">
+                                {location.mapUrl && (
+                                    <HeroButton
+                                        icon={MapPin}
+                                        label="Find us"
+                                        href={location.mapUrl}
+                                        external
+                                        title="Open our location on the map"
+                                        className="flex-1 px-4 sm:w-auto sm:px-6"
+                                    />
+                                )}
+
+                                {location.phoneNumber && (
+                                    <HeroButton
+                                        icon={Phone}
+                                        label="Call"
+                                        href={`tel:${location.phoneNumber}`}
+                                        external
+                                        title={`Call ${location.phoneNumber}`}
+                                        className="flex-1 px-4 sm:w-auto sm:px-6"
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
