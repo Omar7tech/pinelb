@@ -41,7 +41,10 @@ class ManageReservations extends SettingsPage
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $previous = app(ReservationSettings::class)->refresh()->map_image;
+        $settings = app(ReservationSettings::class);
+        $settings->refresh();
+
+        $previous = $settings->map_image;
 
         if (filled($previous) && $previous !== ($data['map_image'] ?? null)) {
             Storage::disk('public')->delete($previous);
