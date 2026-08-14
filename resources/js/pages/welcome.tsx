@@ -18,6 +18,9 @@ import { cn } from '@/lib/utils';
  * the baseline, the label inverts to sage, and the icon rolls over to a fresh
  * copy of itself.
  *
+ * `outline` draws the same shape the other way round — sage on cream, wiping to
+ * sage on hover — for the calls that sit beside the main one.
+ *
  * Passing `href` turns the button into an Inertia link, or a plain one opening
  * in a new tab when `external` is set; `disabled` keeps the shape but drops the
  * navigation (used when delivery is switched off).
@@ -27,6 +30,7 @@ function HeroButton({
     label,
     href,
     external = false,
+    outline = false,
     disabled = false,
     title,
     className,
@@ -35,11 +39,21 @@ function HeroButton({
     label: string;
     href?: string;
     external?: boolean;
+    outline?: boolean;
     disabled?: boolean;
     title?: string;
     className?: string;
 }) {
     const interactive = href !== undefined && !disabled;
+    // The wipe carries the colour the label ends up on, so it is the inverse of
+    // whichever way round the button is drawn.
+    const body = (
+        <HeroButtonBody
+            icon={Icon}
+            label={label}
+            wipeClassName={outline ? 'bg-primary' : 'bg-background'}
+        />
+    );
 
     return (
         <Button
@@ -50,7 +64,10 @@ function HeroButton({
             disabled={interactive ? undefined : disabled}
             title={title}
             className={cn(
-                'relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border-primary bg-primary px-8 text-base text-primary-foreground transition-colors duration-300 ease-out hover:bg-primary hover:text-primary sm:h-12 sm:w-auto sm:px-9',
+                'relative isolate h-13 w-full gap-3 overflow-hidden rounded-full border border-primary px-8 text-base transition-colors duration-300 ease-out sm:h-12 sm:w-auto sm:px-9',
+                outline
+                    ? 'bg-transparent text-primary hover:bg-transparent hover:text-primary-foreground'
+                    : 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary',
                 className,
             )}
         >
@@ -63,15 +80,13 @@ function HeroButton({
                         target={href.startsWith('http') ? '_blank' : undefined}
                         rel={href.startsWith('http') ? 'noreferrer' : undefined}
                     >
-                        <HeroButtonBody icon={Icon} label={label} />
+                        {body}
                     </a>
                 ) : (
-                    <Link href={href}>
-                        <HeroButtonBody icon={Icon} label={label} />
-                    </Link>
+                    <Link href={href}>{body}</Link>
                 )
             ) : (
-                <HeroButtonBody icon={Icon} label={label} />
+                body
             )}
         </Button>
     );
@@ -81,15 +96,20 @@ function HeroButton({
 function HeroButtonBody({
     icon: Icon,
     label,
+    wipeClassName,
 }: {
     icon: LucideIcon;
     label: string;
+    wipeClassName: string;
 }) {
     return (
         <>
             <span
                 aria-hidden
-                className="absolute inset-0 -z-10 origin-bottom scale-y-0 bg-background transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/button:scale-y-100 motion-reduce:transition-none"
+                className={cn(
+                    'absolute inset-0 -z-10 origin-bottom scale-y-0 transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/button:scale-y-100 motion-reduce:transition-none',
+                    wipeClassName,
+                )}
             />
             <span className="relative flex size-5 items-center justify-center overflow-hidden">
                 <Icon className="size-5 transition-transform duration-300 ease-out group-hover/button:-translate-y-6 motion-reduce:transform-none" />
@@ -158,7 +178,7 @@ export default function Welcome() {
                                 </p>
                             )}
                         </section>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        <div className="flex flex-col gap-3">
                             <HeroButton
                                 icon={CalendarCheck}
                                 label="حجوز قعدتك"
@@ -169,20 +189,19 @@ export default function Welcome() {
                                         ? undefined
                                         : 'Reservations are currently unavailable'
                                 }
-                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto sm:px-6"
+                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto sm:self-center sm:px-9"
                             />
 
-                            {/* The two ways to reach us share a line of their
-                                own on a phone, and join the reservation on one
-                                line from `sm` — `contents` drops this box out
-                                of the layout there. */}
-                            <div className="flex gap-3 sm:contents">
+                            {/* The two ways to reach us keep a line of their
+                                own under the reservation, sharing its width. */}
+                            <div className="flex justify-center gap-3">
                                 {location.mapUrl && (
                                     <HeroButton
                                         icon={MapPin}
                                         label="Find us"
                                         href={location.mapUrl}
                                         external
+                                        outline
                                         title="Open our location on the map"
                                         className="flex-1 px-4 sm:w-auto sm:px-6"
                                     />
@@ -194,6 +213,7 @@ export default function Welcome() {
                                         label="Call"
                                         href={`tel:${location.phoneNumber}`}
                                         external
+                                        outline
                                         title={`Call ${location.phoneNumber}`}
                                         className="flex-1 px-4 sm:w-auto sm:px-6"
                                     />
