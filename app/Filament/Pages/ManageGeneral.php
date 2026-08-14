@@ -252,6 +252,74 @@ class ManageGeneral extends SettingsPage
                                         JS),
                             ]),
 
+                        Tab::make('Location')
+                            ->icon(Heroicon::OutlinedMapPin)
+                            ->schema([
+                                Toggle::make('map_enabled')
+                                    ->label('Show the map')
+                                    ->helperText('Offers customers a link to where the shop is.')
+                                    ->default(false)
+                                    ->columnSpanFull(),
+
+                                TextInput::make('map_url')
+                                    ->label('Map link')
+                                    ->helperText('Opens in a new tab, e.g. the share link from Google Maps.')
+                                    ->url()
+                                    ->maxLength(2048)
+                                    ->requiredIf('map_enabled', true)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('map_enabled')
+                                        JS),
+
+                                Toggle::make('map_iframe_enabled')
+                                    ->label('Embed the map in the page')
+                                    ->helperText('Shows the map itself as well as the link.')
+                                    ->default(false)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('map_enabled')
+                                        JS),
+
+                                TextInput::make('map_iframe_url')
+                                    ->label('Embedded map address')
+                                    ->helperText('From Google Maps: Share → Embed a map. Paste the whole snippet or just its link — either works.')
+                                    ->url()
+                                    ->maxLength(2048)
+                                    // A snippet copied whole is reduced to its
+                                    // address as soon as the field is left, so
+                                    // the link validation has a link to judge.
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (?string $state, callable $set): mixed => $set('map_iframe_url', GeneralSettings::embedSource($state)))
+                                    ->dehydrateStateUsing(fn (?string $state): ?string => GeneralSettings::embedSource($state))
+                                    ->requiredIf('map_iframe_enabled', true)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('map_enabled') && $get('map_iframe_enabled')
+                                        JS),
+                            ]),
+
+                        Tab::make('Phone')
+                            ->icon(Heroicon::OutlinedPhone)
+                            ->schema([
+                                Toggle::make('phone_number_enabled')
+                                    ->label('Show the phone number')
+                                    ->helperText('Lets customers call the shop.')
+                                    ->default(false)
+                                    ->columnSpanFull(),
+
+                                TextInput::make('phone_number')
+                                    ->label('Phone number')
+                                    ->helperText('Include the country code, e.g. +9613000000.')
+                                    ->tel()
+                                    ->maxLength(255)
+                                    ->requiredIf('phone_number_enabled', true)
+                                    ->columnSpanFull()
+                                    ->visibleJs(<<<'JS'
+                                        $get('phone_number_enabled')
+                                        JS),
+                            ]),
+
                         Tab::make('Social')
                             ->icon(Heroicon::OutlinedShare)
                             ->schema([

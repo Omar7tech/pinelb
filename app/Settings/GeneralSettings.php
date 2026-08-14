@@ -107,6 +107,36 @@ class GeneralSettings extends Settings
     public ?string $whatsapp_badge_number;
 
     /**
+     * Whether the shop's location is offered as a map link.
+     */
+    public bool $map_enabled;
+
+    /**
+     * The map link, opened in a new tab — a Google Maps place URL or the like.
+     */
+    public ?string $map_url;
+
+    /**
+     * Whether the map is also embedded in the page, as an iframe.
+     */
+    public bool $map_iframe_enabled;
+
+    /**
+     * The embedded map's source, i.e. the `src` of a Google Maps embed snippet.
+     */
+    public ?string $map_iframe_url;
+
+    /**
+     * Whether the shop's phone number is shown.
+     */
+    public bool $phone_number_enabled;
+
+    /**
+     * The number customers can call.
+     */
+    public ?string $phone_number;
+
+    /**
      * The social links shown in the storefront footer. Each entry is shaped
      * `['platform' => string, 'url' => string]`, and a platform appears once.
      *
@@ -221,6 +251,54 @@ class GeneralSettings extends Settings
         $fee = (float) $this->delivery_fee;
 
         return $this->charge_delivery && $fee > 0 ? $fee : null;
+    }
+
+    /**
+     * The map link to offer, or null when there is none to offer — either the
+     * map is switched off or no link is configured.
+     */
+    public function usableMapUrl(): ?string
+    {
+        return $this->map_enabled && filled($this->map_url)
+            ? $this->map_url
+            : null;
+    }
+
+    /**
+     * The embedded map's source, or null when it can't be embedded. The embed
+     * rides on the map being on at all, so turning the map off takes both.
+     */
+    public function usableMapIframeUrl(): ?string
+    {
+        return $this->map_enabled && $this->map_iframe_enabled && filled($this->map_iframe_url)
+            ? $this->map_iframe_url
+            : null;
+    }
+
+    /**
+     * The phone number to show, or null when it's switched off or unset.
+     */
+    public function usablePhoneNumber(): ?string
+    {
+        return $this->phone_number_enabled && filled($this->phone_number)
+            ? $this->phone_number
+            : null;
+    }
+
+    /**
+     * The `src` of a pasted `<iframe>`, so an embed snippet copied whole out of
+     * Google Maps is accepted as readily as the bare URL. Anything that isn't a
+     * snippet is handed back untouched.
+     */
+    public static function embedSource(?string $value): ?string
+    {
+        if (blank($value) || ! str_contains($value, '<iframe')) {
+            return $value;
+        }
+
+        preg_match('/\bsrc\s*=\s*["\']([^"\']+)["\']/i', $value, $matches);
+
+        return $matches[1] ?? $value;
     }
 
     /**

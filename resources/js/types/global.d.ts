@@ -1,6 +1,7 @@
 import type { Auth } from '@/types/auth';
 import type { Banner } from '@/types/banner';
 import type { Checkout } from '@/types/checkout';
+import type { Location } from '@/types/location';
 import type { Pricing } from '@/types/pricing';
 import type { Reservations } from '@/types/reservation';
 import type { Shop } from '@/types/shop';
@@ -22,6 +23,7 @@ declare module '@inertiajs/core' {
             shop: Shop;
             pricing: Pricing;
             checkout: Checkout;
+            location: Location;
             socials: Social[];
             onlineOrderingActive: boolean;
             reservations: Reservations;

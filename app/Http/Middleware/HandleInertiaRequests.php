@@ -85,6 +85,14 @@ class HandleInertiaRequests extends Middleware
                 'show' => $settings->show_whatsapp_badge && filled($settings->whatsapp_badge_number),
                 'number' => $settings->whatsapp_badge_number,
             ],
+            // Where the shop is and how to reach it. Each of these is null when
+            // it's switched off or left blank, so the storefront can simply ask
+            // whether it has one.
+            'location' => [
+                'mapUrl' => $settings->usableMapUrl(),
+                'mapIframeUrl' => $settings->usableMapIframeUrl(),
+                'phoneNumber' => $settings->usablePhoneNumber(),
+            ],
             'socials' => $this->socialLinks($settings),
         ];
     }

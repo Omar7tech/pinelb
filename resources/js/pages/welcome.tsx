@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
-import { Bike, CalendarCheck, UtensilsCrossed } from 'lucide-react';
+import { Bike, CalendarCheck, MapPin, UtensilsCrossed } from 'lucide-react';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
@@ -12,13 +12,15 @@ import { cn } from '@/lib/utils';
  * the baseline, the label inverts to sage, and the icon rolls over to a fresh
  * copy of itself.
  *
- * Passing `href` turns the button into an Inertia link; `disabled` keeps the
- * shape but drops the navigation (used when delivery is switched off).
+ * Passing `href` turns the button into an Inertia link, or a plain one opening
+ * in a new tab when `external` is set; `disabled` keeps the shape but drops the
+ * navigation (used when delivery is switched off).
  */
 function HeroButton({
     icon: Icon,
     label,
     href,
+    external = false,
     disabled = false,
     title,
     className,
@@ -26,6 +28,7 @@ function HeroButton({
     icon: LucideIcon;
     label: string;
     href?: string;
+    external?: boolean;
     disabled?: boolean;
     title?: string;
     className?: string;
@@ -46,9 +49,15 @@ function HeroButton({
             )}
         >
             {interactive ? (
-                <Link href={href}>
-                    <HeroButtonBody icon={Icon} label={label} />
-                </Link>
+                external ? (
+                    <a href={href} target="_blank" rel="noreferrer">
+                        <HeroButtonBody icon={Icon} label={label} />
+                    </a>
+                ) : (
+                    <Link href={href}>
+                        <HeroButtonBody icon={Icon} label={label} />
+                    </Link>
+                )
             ) : (
                 <HeroButtonBody icon={Icon} label={label} />
             )}
@@ -83,7 +92,7 @@ function HeroButtonBody({
 }
 
 export default function Welcome() {
-    const { onlineOrderingActive, reservations } = usePage().props;
+    const { location, onlineOrderingActive, reservations } = usePage().props;
     const shop = useShop();
     const shopOpen = useShopOpen();
     const opensLabel = nextOpeningLabel(shop);
@@ -137,18 +146,31 @@ export default function Welcome() {
                                 </p>
                             )}
                         </section>
-                        <HeroButton
-                            icon={CalendarCheck}
-                            label="حجوز قعدتك"
-                            href="/spots"
-                            disabled={!reservations.active}
-                            title={
-                                reservations.active
-                                    ? undefined
-                                    : 'Reservations are currently unavailable'
-                            }
-                            className="self-center border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto"
-                        />
+                        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                            <HeroButton
+                                icon={CalendarCheck}
+                                label="حجوز قعدتك"
+                                href="/spots"
+                                disabled={!reservations.active}
+                                title={
+                                    reservations.active
+                                        ? undefined
+                                        : 'Reservations are currently unavailable'
+                                }
+                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto"
+                            />
+
+                            {location.mapUrl && (
+                                <HeroButton
+                                    icon={MapPin}
+                                    label="Find us"
+                                    href={location.mapUrl}
+                                    external
+                                    title="Open our location on the map"
+                                    className="sm:w-auto"
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
                 <Treeline className="animate-in delay-1000 duration-600 ease-out fill-mode-backwards fade-in slide-in-from-bottom-6 motion-reduce:animate-none" />

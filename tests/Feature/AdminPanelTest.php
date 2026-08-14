@@ -1,5 +1,6 @@
 <?php
 
+use App\Filament\Pages\ManageGeneral;
 use App\Filament\Pages\ManageReservations;
 use App\Filament\Resources\Categories\Pages\CreateCategory;
 use App\Filament\Resources\Categories\Pages\EditCategory;
@@ -191,6 +192,43 @@ it('saves the reservation settings', function (): void {
         ->assertHasNoFormErrors();
 
     expect(app(ReservationSettings::class)->refresh()->phone_number)->toBe('+9613000000');
+});
+
+it('saves the location and phone settings, taking an embed snippet whole', function (): void {
+    Livewire::test(ManageGeneral::class)
+        ->fillForm([
+            // The delivery tab guards its own number, and saving is all or
+            // nothing across the tabs.
+            'whatsapp_number' => '+9613000000',
+            'map_enabled' => true,
+            'map_url' => 'https://maps.app.goo.gl/pine',
+            'map_iframe_enabled' => true,
+            'map_iframe_url' => '<iframe src="https://www.google.com/maps/embed?pb=pine"></iframe>',
+            'phone_number_enabled' => true,
+            'phone_number' => '+9613000000',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $settings = app(GeneralSettings::class)->refresh();
+
+    expect($settings->usableMapUrl())->toBe('https://maps.app.goo.gl/pine')
+        ->and($settings->usableMapIframeUrl())->toBe('https://www.google.com/maps/embed?pb=pine')
+        ->and($settings->usablePhoneNumber())->toBe('+9613000000');
+});
+
+it('requires a link and a number once the map and phone are enabled', function (): void {
+    Livewire::test(ManageGeneral::class)
+        ->fillForm([
+            'map_enabled' => true,
+            'map_url' => null,
+            'map_iframe_enabled' => true,
+            'map_iframe_url' => null,
+            'phone_number_enabled' => true,
+            'phone_number' => null,
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['map_url', 'map_iframe_url', 'phone_number']);
 });
 
 it('requires a reservation number while reservations are enabled', function (): void {

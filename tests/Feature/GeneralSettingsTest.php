@@ -114,6 +114,66 @@ it('shares the delivery charge and the details asked for at checkout', function 
             ->where('checkout.getClientLocation', true));
 });
 
+it('only offers the map when it is on with a link', function (): void {
+    expect(settings(['map_enabled' => false, 'map_url' => 'https://maps.app.goo.gl/pine'])->usableMapUrl())->toBeNull()
+        ->and(settings(['map_enabled' => true, 'map_url' => null])->usableMapUrl())->toBeNull()
+        ->and(settings(['map_enabled' => true, 'map_url' => 'https://maps.app.goo.gl/pine'])->usableMapUrl())
+        ->toBe('https://maps.app.goo.gl/pine');
+});
+
+it('drops the embedded map when the map itself is off', function (): void {
+    $embed = 'https://www.google.com/maps/embed?pb=pine';
+
+    expect(settings([
+        'map_enabled' => false,
+        'map_iframe_enabled' => true,
+        'map_iframe_url' => $embed,
+    ])->usableMapIframeUrl())->toBeNull()
+        ->and(settings(['map_enabled' => true, 'map_iframe_enabled' => false])->usableMapIframeUrl())->toBeNull()
+        ->and(settings(['map_enabled' => true, 'map_iframe_enabled' => true])->usableMapIframeUrl())->toBe($embed);
+});
+
+it('only shows the phone number when it is on and set', function (): void {
+    expect(settings(['phone_number_enabled' => false, 'phone_number' => '+9613000000'])->usablePhoneNumber())->toBeNull()
+        ->and(settings(['phone_number_enabled' => true, 'phone_number' => ''])->usablePhoneNumber())->toBeNull()
+        ->and(settings(['phone_number_enabled' => true, 'phone_number' => '+9613000000'])->usablePhoneNumber())
+        ->toBe('+9613000000');
+});
+
+it('shares the location with the storefront, and withholds a map that is off', function (): void {
+    settings([
+        'map_enabled' => true,
+        'map_url' => 'https://maps.app.goo.gl/pine',
+        'map_iframe_enabled' => true,
+        'map_iframe_url' => 'https://www.google.com/maps/embed?pb=pine',
+        'phone_number_enabled' => true,
+        'phone_number' => '+9613000000',
+    ]);
+
+    $this->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('location.mapUrl', 'https://maps.app.goo.gl/pine')
+            ->where('location.mapIframeUrl', 'https://www.google.com/maps/embed?pb=pine')
+            ->where('location.phoneNumber', '+9613000000'));
+
+    settings(['map_enabled' => false]);
+
+    $this->get(route('home'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('location.mapUrl', null)
+            ->where('location.mapIframeUrl', null)
+            ->where('location.phoneNumber', '+9613000000'));
+});
+
+it('reads the address out of a pasted map embed snippet', function (): void {
+    $snippet = '<iframe src="https://www.google.com/maps/embed?pb=pine" width="600" height="450"></iframe>';
+
+    expect(GeneralSettings::embedSource($snippet))->toBe('https://www.google.com/maps/embed?pb=pine')
+        ->and(GeneralSettings::embedSource('https://www.google.com/maps/embed?pb=pine'))
+        ->toBe('https://www.google.com/maps/embed?pb=pine')
+        ->and(GeneralSettings::embedSource(null))->toBeNull();
+});
+
 it('shares only the social links that name a known platform and a url', function (): void {
     settings([
         'social_links' => [
