@@ -79,6 +79,14 @@ export function SiteFooter({ categories, onSelectCategory }: SiteFooterProps) {
                 </p>
             </div>
 
+            {/* The invitation, hung just over the treetops as the send-off. */}
+            <img
+                src="/logos/meet-me-under-the-pines-transparent.png"
+                alt="Meet me under the pines."
+                draggable={false}
+                className="mx-auto -mb-4 w-full max-w-[15rem] select-none sm:-mb-6 sm:max-w-xs md:max-w-sm"
+            />
+
             <Treeline />
         </footer>
     );
