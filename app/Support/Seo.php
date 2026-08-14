@@ -6,6 +6,7 @@ use App\Enums\SocialPlatform;
 use App\Enums\Weekday;
 use App\Models\Category;
 use App\Models\Product;
+use App\Providers\AppServiceProvider;
 use App\Settings\GeneralSettings;
 use App\Settings\ReservationSettings;
 use Illuminate\Support\Facades\Cache;
@@ -68,11 +69,30 @@ class Seo
             ...$page,
             'imageWidth' => self::IMAGE_WIDTH,
             'imageHeight' => self::IMAGE_HEIGHT,
-            'url' => url()->current(),
+            'url' => $this->canonicalUrl(),
             // Let Google use the full image and an untruncated snippet — a
             // photo of the place is the reason someone clicks it.
             'robots' => 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
         ];
+    }
+
+    /**
+     * This page's one true URL, always rooted at the configured domain rather
+     * than at whatever host the request happened to arrive on.
+     *
+     * A visit to `www.`, to plain `http://`, or through a preview hostname
+     * would otherwise name itself as the canonical, and the same page would
+     * compete with itself for the same rankings.
+     *
+     * Only the path comes from the request. The scheme and host come from the
+     * root {@see AppServiceProvider::configureCanonicalUrls()}
+     * pins at boot, which is the same root `route()` and `asset()` build on —
+     * so the canonical can never disagree with the URLs around it. The query
+     * string is dropped, folding a link tagged `?fbclid=…` into the clean URL.
+     */
+    private function canonicalUrl(): string
+    {
+        return url()->to(request()->path());
     }
 
     /**
@@ -437,7 +457,7 @@ class Seo
 
         return [
             '@type' => 'BreadcrumbList',
-            '@id' => url()->current().'#breadcrumb',
+            '@id' => $this->canonicalUrl().'#breadcrumb',
             'itemListElement' => array_map(fn (array $crumb, int $index): array => [
                 '@type' => 'ListItem',
                 'position' => $index + 1,

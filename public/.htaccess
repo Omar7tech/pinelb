@@ -23,3 +23,61 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Compress every text response. The app ships ~390 KB of JavaScript and CSS on a
+# first visit, which gzip takes down to roughly a quarter of that — the single
+# biggest thing standing between a phone on mobile data and a fast first paint.
+<IfModule mod_deflate.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+        AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+        AddOutputFilterByType DEFLATE application/json application/xml application/rss+xml
+        AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json
+    </IfModule>
+</IfModule>
+
+# Brotli where the host offers it; it beats gzip by another ~15% and Apache
+# picks it over deflate on its own when the browser asks for it.
+<IfModule mod_brotli.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/xml
+        AddOutputFilterByType BROTLI_COMPRESS application/javascript application/x-javascript
+        AddOutputFilterByType BROTLI_COMPRESS application/json application/xml application/rss+xml
+        AddOutputFilterByType BROTLI_COMPRESS image/svg+xml application/manifest+json
+    </IfModule>
+</IfModule>
+
+# How long a browser may keep each kind of file.
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML is never cached: it carries the meta tags and the menu, both of which
+    # change the moment something is edited in the admin panel.
+    ExpiresByType text/html "access plus 0 seconds"
+
+    # Uploaded photos and the icons, which are replaced rather than edited.
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/avif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 month"
+
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
+
+# Vite fingerprints everything under /build, so a changed file always arrives
+# under a new name — those may be kept forever and never revalidated.
+#
+# Scoped to that folder on purpose. The assets sat directly in public/ keep
+# stable names and do get replaced in place — an Open Graph photo swapped for a
+# better one must not be frozen on a customer's phone for a year — so they fall
+# back to the shorter windows set above.
+<IfModule mod_headers.c>
+    SetEnvIf Request_URI "^/build/" IMMUTABLE_ASSET
+    Header set Cache-Control "public, max-age=31536000, immutable" env=IMMUTABLE_ASSET
+</IfModule>

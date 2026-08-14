@@ -7,6 +7,7 @@ use App\Settings\GeneralSettings;
 use App\Settings\ReservationSettings;
 use App\Support\Seo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 
 uses(RefreshDatabase::class);
 
@@ -54,6 +55,30 @@ it('serves every public page with its own title, description and canonical', fun
     ['menu.delivery', 'Delivery Menu'],
     ['spots.index', 'Reserve Your Spot'],
 ]);
+
+it('names one canonical host however the request arrived', function (): void {
+    // Stands in for what AppServiceProvider does from APP_URL at boot, which is
+    // too early for a config() call inside a test to reach.
+    URL::forceRootUrl('https://pinelb.com');
+    URL::forceScheme('https');
+
+    // The same page reached over www, over plain http, and with a tracking
+    // parameter has to name the one clean URL, or it competes with itself.
+    $html = $this->get('http://www.pinelb.com/menu/dine-in?fbclid=abc123')->getContent();
+
+    // Only the head is checked: Inertia writes the raw request URL into its own
+    // `data-page` payload in the body, which is how the SPA knows where it is.
+    // No crawler reads it, and no tag in the head may carry either.
+    $head = str($html)->before('</head>')->toString();
+
+    expect($head)
+        ->toContain('<link rel="canonical" href="https://pinelb.com/menu/dine-in">')
+        ->toContain('<meta property="og:url" content="https://pinelb.com/menu/dine-in">')
+        // Every generated URL is rooted at the configured domain, not the request's.
+        ->toContain('<meta property="og:image" content="https://pinelb.com/og/menu.jpg">')
+        ->not->toContain('www.pinelb.com')
+        ->not->toContain('fbclid');
+});
 
 it('gives each page its own Open Graph image', function (): void {
     $this->get(route('home'))->assertSee('og/home.jpg', false);

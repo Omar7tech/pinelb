@@ -16,7 +16,8 @@ class SeoController extends Controller
     public function robots(Seo $seo): Response
     {
         return response(implode("\n", $seo->robotsLines()), 200)
-            ->header('Content-Type', 'text/plain; charset=UTF-8');
+            ->header('Content-Type', 'text/plain; charset=UTF-8')
+            ->header('Cache-Control', 'public, max-age=3600');
     }
 
     /**
@@ -50,7 +51,11 @@ class SeoController extends Controller
 
         $lines[] = '</urlset>';
 
+        // Short-lived rather than uncached: the menu changes often enough that a
+        // stale `lastmod` is worth avoiding, but a crawler re-fetching this on
+        // every hit is pure load on a small shared host.
         return response(implode("\n", $lines)."\n", 200)
-            ->header('Content-Type', 'application/xml; charset=UTF-8');
+            ->header('Content-Type', 'application/xml; charset=UTF-8')
+            ->header('Cache-Control', 'public, max-age=3600');
     }
 }
