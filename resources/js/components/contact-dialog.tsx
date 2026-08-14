@@ -44,17 +44,14 @@ export function ContactDialog({
                 <a
                     href={`tel:${phoneNumber}`}
                     dir="ltr"
-                    className="block rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-center font-heading text-2xl tracking-wide text-primary transition-colors hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    className="block rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-center text-lg font-medium tracking-[0.08em] text-foreground tabular-nums transition-colors hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                     {phoneNumber}
                 </a>
 
                 <div className="flex flex-col gap-3 sm:flex-row">
                     <a
-                        href={buildWhatsAppUrl(
-                            whatsappNumber,
-                            'Hi! I have a question about Pine.',
-                        )}
+                        href={buildWhatsAppUrl(whatsappNumber)}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm tracking-wide text-primary-foreground uppercase transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"

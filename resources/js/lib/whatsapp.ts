@@ -1,9 +1,11 @@
 /**
- * Build a WhatsApp deep link for a number and a pre-filled message. The number
- * is reduced to digits because wa.me rejects spaces, dashes and a leading `+`.
+ * Build a WhatsApp deep link for a number, with a message pre-filled when one
+ * is given and an empty chat when it isn't. The number is reduced to digits
+ * because wa.me rejects spaces, dashes and a leading `+`.
  */
-export function buildWhatsAppUrl(number: string, message: string): string {
+export function buildWhatsAppUrl(number: string, message?: string): string {
     const digits = number.replace(/\D/g, '');
+    const url = `https://wa.me/${digits}`;
 
-    return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+    return message ? `${url}?text=${encodeURIComponent(message)}` : url;
 }
