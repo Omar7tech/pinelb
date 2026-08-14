@@ -1,5 +1,11 @@
 import { cn } from '@/lib/utils';
 
+/**
+ * Which way the name grows from the marker. A pin against the left or right
+ * edge of the plan hangs its name inwards, so a long one isn't cut off.
+ */
+export type PinAlign = 'start' | 'center' | 'end';
+
 interface SpotPinProps {
     /** Taken spots are drawn in the brick tone, free ones in sage. */
     reserved: boolean;
@@ -9,13 +15,39 @@ interface SpotPinProps {
     color?: string | null;
     /** Written under the marker, so a spot is read without opening it. */
     name?: string;
+    /** Defaults to a name centred under the marker. */
+    align?: PinAlign;
+    /** A teardrop that stands on its point, for a spot near the top edge. */
+    flipped?: boolean;
+    /** The name goes over the marker, for a spot near the bottom edge. */
+    labelAbove?: boolean;
     className?: string;
 }
 
-/** The name, hung under the marker so a long one can't shift its anchor. */
-function PinLabel({ name }: { name: string }) {
+const LABEL_ANCHOR: Record<PinAlign, string> = {
+    start: 'left-0',
+    center: 'left-1/2 -translate-x-1/2',
+    end: 'right-0',
+};
+
+/** The name, hung off the marker so a long one can't shift its anchor. */
+function PinLabel({
+    name,
+    align,
+    above,
+}: {
+    name: string;
+    align: PinAlign;
+    above: boolean;
+}) {
     return (
-        <span className="pointer-events-none absolute top-full left-1/2 mt-1 -translate-x-1/2 rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm">
+        <span
+            className={cn(
+                'pointer-events-none absolute rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm',
+                above ? 'bottom-full mb-1' : 'top-full mt-1',
+                LABEL_ANCHOR[align],
+            )}
+        >
             {name}
         </span>
     );
@@ -28,12 +60,19 @@ function PinLabel({ name }: { name: string }) {
  * with `translate(-50%, -100%)`. A landmark is a small diamond centred on the
  * point instead — `translate(-50%, -50%)` — so the two are told apart by shape
  * rather than colour alone, since the colour is the admin's to choose.
+ *
+ * A `flipped` teardrop stands on its point rather than hanging from it, for a
+ * spot so near the top of the plan that the frame would cut its body off;
+ * anchor that one with `translate(-50%, 0)`.
  */
 export function SpotPin({
     reserved,
     landmark = false,
     color,
     name,
+    align = 'center',
+    flipped = false,
+    labelAbove = false,
     className,
 }: SpotPinProps) {
     if (landmark) {
@@ -47,7 +86,9 @@ export function SpotPin({
                     )}
                 />
 
-                {name && <PinLabel name={name} />}
+                {name && (
+                    <PinLabel name={name} align={align} above={labelAbove} />
+                )}
             </span>
         );
     }
@@ -59,10 +100,14 @@ export function SpotPin({
                 aria-hidden
                 style={color ? { color } : undefined}
                 className={cn(
-                    'block h-9 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)]',
+                    // Smaller on a phone, where the plan itself is small and a
+                    // full-size teardrop crowds its neighbours. `SpotMapView`
+                    // matches these sizes when it keeps a pin off an edge.
+                    'block h-7 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)] sm:h-9',
                     // The chosen colour is carried by the inline style, so the
                     // state tone is only asked for when there isn't one.
                     !color && (reserved ? 'text-brick' : 'text-primary'),
+                    flipped && 'rotate-180',
                 )}
             >
                 <path
@@ -79,7 +124,7 @@ export function SpotPin({
                 />
             </svg>
 
-            {name && <PinLabel name={name} />}
+            {name && <PinLabel name={name} align={align} above={labelAbove} />}
         </span>
     );
 }
