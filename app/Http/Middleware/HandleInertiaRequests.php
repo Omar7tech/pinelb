@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Enums\SocialPlatform;
 use App\Settings\GeneralSettings;
 use App\Settings\ReservationSettings;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -94,6 +95,10 @@ class HandleInertiaRequests extends Middleware
                 'phoneNumber' => $settings->usablePhoneNumber(),
             ],
             'socials' => $this->socialLinks($settings),
+            // The title and description the server already wrote into the head,
+            // handed to the SPA so a client-side visit retitles the tab to
+            // exactly what a crawler was served rather than a shorter label.
+            'seo' => app(Seo::class)->share($request->route()?->getName()),
         ];
     }
 

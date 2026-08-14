@@ -1,7 +1,30 @@
 {
-  "name": "Pine - Breath Nature",
+  "id": "/",
+  "name": "Pine — Open-Air Café & Restaurant, Aley",
   "short_name": "Pine",
+  "description": "Coffee, crepes, saj, burgers and fresh juices served in the open air under the pines in Aley, Mount Lebanon. Dine in, order delivery, or reserve your spot.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#faf3de",
+  "background_color": "#faf3de",
+  "categories": ["food", "lifestyle", "travel"],
   "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png?v=20260802",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png?v=20260802",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/web-app-manifest-192x192.png?v=20260802",
       "sizes": "192x192",
@@ -15,7 +38,18 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#faf3de",
-  "background_color": "#faf3de",
-  "display": "standalone"
+  "shortcuts": [
+    {
+      "name": "Dine-in menu",
+      "url": "/menu/dine-in"
+    },
+    {
+      "name": "Delivery menu",
+      "url": "/menu/delivery"
+    },
+    {
+      "name": "Reserve a spot",
+      "url": "/spots"
+    }
+  ]
 }

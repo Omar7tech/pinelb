@@ -1,10 +1,11 @@
-import { Head, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { ShopClosedNotice } from '@/components/menu/shop-closed-notice';
 import { SiteBanner } from '@/components/menu/site-banner';
 import { SiteFooter } from '@/components/menu/site-footer';
 import { SiteHeader } from '@/components/menu/site-header';
 import { WhatsAppFab } from '@/components/menu/whatsapp-fab';
+import { PageHead } from '@/components/page-head';
 import { SpotCard } from '@/components/spots/spot-card';
 import { SpotDialog } from '@/components/spots/spot-dialog';
 import type { SpotFilterValue } from '@/components/spots/spot-filter';
@@ -81,7 +82,7 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
 
     return (
         <>
-            <Head title="Reserve a spot" />
+            <PageHead />
 
             <div className="flex min-h-svh flex-col">
                 <SiteBanner />

@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     Bike,
@@ -10,6 +10,7 @@ import {
 import { useState } from 'react';
 import { ContactDialog } from '@/components/contact-dialog';
 import { LocationDialog } from '@/components/location-dialog';
+import { PageHead } from '@/components/page-head';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
@@ -146,9 +147,16 @@ export default function Welcome() {
 
     return (
         <>
-            <Head title="Welcome" />
+            <PageHead />
             <div className="flex min-h-svh flex-col">
                 <div className="flex flex-1 flex-col items-center justify-center gap-10 px-6 py-16">
+                    {/* The wordmark carries the page visually, but a drawn logo
+                        gives a search engine nothing to read — the heading says
+                        the same thing in words, for crawlers and screen readers. */}
+                    <h1 className="sr-only">
+                        Pine — open-air café and restaurant in Aley, Mount
+                        Lebanon
+                    </h1>
                     <PineLogo className="w-full max-w-xs select-none sm:max-w-sm" />
                     <div className="flex w-full max-w-xs animate-in flex-col items-stretch gap-4 delay-800 duration-450 ease-out fill-mode-backwards fade-in slide-in-from-bottom-4 motion-reduce:animate-none sm:max-w-md">
                         <section

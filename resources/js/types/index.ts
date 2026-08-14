@@ -5,5 +5,6 @@ export type * from './checkout';
 export type * from './location';
 export type * from './pricing';
 export type * from './reservation';
+export type * from './seo';
 export type * from './shop';
 export type * from './social';

@@ -1,4 +1,3 @@
-import { Head } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { CartSheet } from '@/components/menu/cart-sheet';
 import { CartToast } from '@/components/menu/cart-toast';
@@ -13,6 +12,7 @@ import { SiteBanner } from '@/components/menu/site-banner';
 import { SiteFooter } from '@/components/menu/site-footer';
 import { SiteHeader } from '@/components/menu/site-header';
 import { WhatsAppFab } from '@/components/menu/whatsapp-fab';
+import { PageHead } from '@/components/page-head';
 import { CartProvider } from '@/contexts/cart-context';
 import type { Category, OrderType, Slide } from '@/types';
 
@@ -85,7 +85,7 @@ export default function Menu({
 
     return (
         <CartProvider>
-            <Head title={`${orderTypeLabel} menu`} />
+            <PageHead />
 
             <div className="flex min-h-svh flex-col">
                 <SiteBanner />
