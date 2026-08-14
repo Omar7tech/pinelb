@@ -7,6 +7,8 @@ import {
     Phone,
     UtensilsCrossed,
 } from 'lucide-react';
+import { useState } from 'react';
+import { LocationDialog } from '@/components/location-dialog';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
 import { Button } from '@/components/ui/button';
@@ -29,6 +31,7 @@ function HeroButton({
     icon: Icon,
     label,
     href,
+    onClick,
     external = false,
     outline = false,
     disabled = false,
@@ -38,6 +41,8 @@ function HeroButton({
     icon: LucideIcon;
     label: string;
     href?: string;
+    /** Acts in place instead of navigating — used to open the map dialog. */
+    onClick?: () => void;
     external?: boolean;
     outline?: boolean;
     disabled?: boolean;
@@ -59,6 +64,7 @@ function HeroButton({
         <Button
             asChild={interactive}
             size="lg"
+            onClick={onClick}
             // `disabled` is only a valid attribute on the plain button shape;
             // when the button renders as a link it must not be forwarded.
             disabled={interactive ? undefined : disabled}
@@ -128,6 +134,10 @@ export default function Welcome() {
     const shop = useShop();
     const shopOpen = useShopOpen();
     const opensLabel = nextOpeningLabel(shop);
+    const [mapOpen, setMapOpen] = useState(false);
+    // Either half of the location is enough to offer the button: an embedded
+    // map opens in place, and a link opens the map app.
+    const findUs = location.mapIframeUrl ?? location.mapUrl;
 
     return (
         <>
@@ -189,20 +199,33 @@ export default function Welcome() {
                                         ? undefined
                                         : 'Reservations are currently unavailable'
                                 }
-                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-auto sm:self-center sm:px-9"
+                                className="border-brick bg-brick hover:bg-brick hover:text-brick sm:w-full"
                             />
 
                             {/* The two ways to reach us keep a line of their
                                 own under the reservation, sharing its width. */}
                             <div className="flex justify-center gap-3">
-                                {location.mapUrl && (
+                                {/* With a map to embed, the button opens it
+                                    here and the dialog carries the way out to
+                                    a full map; without one it is that way out
+                                    itself. */}
+                                {findUs && (
                                     <HeroButton
                                         icon={MapPin}
                                         label="Find us"
-                                        href={location.mapUrl}
+                                        href={
+                                            location.mapIframeUrl
+                                                ? undefined
+                                                : (location.mapUrl ?? undefined)
+                                        }
+                                        onClick={
+                                            location.mapIframeUrl
+                                                ? () => setMapOpen(true)
+                                                : undefined
+                                        }
                                         external
                                         outline
-                                        title="Open our location on the map"
+                                        title="See where we are"
                                         className="flex-1 px-4 sm:w-auto sm:px-6"
                                     />
                                 )}
@@ -224,6 +247,15 @@ export default function Welcome() {
                 </div>
                 <Treeline className="animate-in delay-1000 duration-600 ease-out fill-mode-backwards fade-in slide-in-from-bottom-6 motion-reduce:animate-none" />
             </div>
+
+            {location.mapIframeUrl && (
+                <LocationDialog
+                    open={mapOpen}
+                    onOpenChange={setMapOpen}
+                    iframeUrl={location.mapIframeUrl}
+                    mapUrl={location.mapUrl}
+                />
+            )}
         </>
     );
 }
