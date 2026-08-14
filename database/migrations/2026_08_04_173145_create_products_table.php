@@ -19,8 +19,11 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('subtitle')->nullable();
             $table->text('description')->nullable();
+            $table->unsignedSmallInteger('preparation_time')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_featured')->default(false);
+            $table->boolean('is_spicy')->default(false);
+            $table->boolean('is_vegan')->default(false);
             $table->unsignedMediumInteger('sort_order')->default(0);
             $table->decimal('price', 8, 2);
             $table->decimal('discount_price', 8, 2)->nullable();
