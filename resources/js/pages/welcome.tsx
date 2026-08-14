@@ -8,6 +8,7 @@ import {
     UtensilsCrossed,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ContactDialog } from '@/components/contact-dialog';
 import { LocationDialog } from '@/components/location-dialog';
 import { PineLogo } from '@/components/pine-logo';
 import { Treeline } from '@/components/treeline';
@@ -130,11 +131,15 @@ function HeroButtonBody({
 }
 
 export default function Welcome() {
-    const { location, onlineOrderingActive, reservations } = usePage().props;
+    const { location, onlineOrderingActive, reservations, whatsappBadge } =
+        usePage().props;
     const shop = useShop();
     const shopOpen = useShopOpen();
     const opensLabel = nextOpeningLabel(shop);
     const [mapOpen, setMapOpen] = useState(false);
+    const [contactOpen, setContactOpen] = useState(false);
+    // The chat number, which is what turns a call into a choice of two.
+    const whatsappNumber = whatsappBadge.show ? whatsappBadge.number : null;
     // Either half of the location is enough to offer the button: an embedded
     // map opens in place, and a link opens the map app.
     const findUs = location.mapIframeUrl ?? location.mapUrl;
@@ -230,14 +235,30 @@ export default function Welcome() {
                                     />
                                 )}
 
+                                {/* With WhatsApp on offer the button opens the
+                                    choice between it and a call; on its own,
+                                    the phone number simply dials. */}
                                 {location.phoneNumber && (
                                     <HeroButton
                                         icon={Phone}
                                         label="Call"
-                                        href={`tel:${location.phoneNumber}`}
+                                        href={
+                                            whatsappNumber
+                                                ? undefined
+                                                : `tel:${location.phoneNumber}`
+                                        }
+                                        onClick={
+                                            whatsappNumber
+                                                ? () => setContactOpen(true)
+                                                : undefined
+                                        }
                                         external
                                         outline
-                                        title={`Call ${location.phoneNumber}`}
+                                        title={
+                                            whatsappNumber
+                                                ? 'Message or call us'
+                                                : `Call ${location.phoneNumber}`
+                                        }
                                         className="flex-1 px-4 sm:w-auto sm:px-6"
                                     />
                                 )}
@@ -254,6 +275,15 @@ export default function Welcome() {
                     onOpenChange={setMapOpen}
                     iframeUrl={location.mapIframeUrl}
                     mapUrl={location.mapUrl}
+                />
+            )}
+
+            {location.phoneNumber && whatsappNumber && (
+                <ContactDialog
+                    open={contactOpen}
+                    onOpenChange={setContactOpen}
+                    phoneNumber={location.phoneNumber}
+                    whatsappNumber={whatsappNumber}
                 />
             )}
         </>
