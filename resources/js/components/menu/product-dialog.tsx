@@ -113,7 +113,7 @@ export function ProductDialog({
 
                 <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pb-5">
                     <DialogHeader className="shrink-0">
-                        <DialogTitle className="flex items-start gap-2 pr-8">
+                        <DialogTitle className="flex items-start gap-2 pr-8 font-sans">
                             <span className="flex-1">{product.title}</span>
                             {product.is_featured && (
                                 <Star className="mt-1.5 size-5 shrink-0 fill-primary/70 text-primary/70" />

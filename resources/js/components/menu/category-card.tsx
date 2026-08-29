@@ -35,7 +35,7 @@ export function CategoryCard({ category, onSelect }: CategoryCardProps) {
                 <span className="aspect-square w-3/5 max-w-32 rounded-xl bg-primary-foreground/10" />
             )}
 
-            <span className="line-clamp-2 text-center font-heading text-xs leading-tight font-semibold tracking-normal uppercase sm:text-xl">
+            <span className="line-clamp-2 text-center text-xs leading-tight font-semibold tracking-normal uppercase sm:text-xl">
                 {category.title}
             </span>
         </button>

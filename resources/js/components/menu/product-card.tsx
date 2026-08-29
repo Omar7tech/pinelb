@@ -117,7 +117,7 @@ function ProductCardComponent({
                             <h3
                                 dir={rtl ? 'rtl' : undefined}
                                 className={cn(
-                                    'min-w-0 flex-1 truncate font-heading text-xl leading-tight font-semibold text-primary',
+                                    'min-w-0 flex-1 truncate text-xl leading-tight font-semibold text-primary',
                                     rtl && 'text-right',
                                 )}
                             >

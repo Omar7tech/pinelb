@@ -105,7 +105,7 @@ export default function Menu({
                                 Our menu
                             </span>
 
-                            <h1 className="min-w-0 truncate font-heading text-4xl leading-none font-semibold tracking-normal text-primary uppercase md:text-5xl">
+                            <h1 className="min-w-0 truncate text-4xl leading-none font-semibold tracking-normal text-primary uppercase md:text-5xl">
                                 {orderTypeLabel}
                             </h1>
                         </div>

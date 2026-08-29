@@ -165,7 +165,7 @@ export default function Welcome() {
                         >
                             <h2
                                 id="menu-heading"
-                                className="text-center font-heading text-4xl font-semibold tracking-normal text-primary uppercase sm:text-4xl"
+                                className="text-center text-4xl font-semibold tracking-normal text-primary uppercase sm:text-4xl"
                             >
                                 Menu
                             </h2>

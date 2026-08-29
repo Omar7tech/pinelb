@@ -107,7 +107,7 @@ export function CartSheet() {
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent className="flex h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[88vh]">
                     <DialogHeader className="shrink-0 border-b border-primary/15 p-5 pr-14">
-                        <DialogTitle className="flex items-center gap-2.5">
+                        <DialogTitle className="flex items-center gap-2.5 font-sans">
                             {STEP_TITLES[checkout.step]}
                             {checkout.step === 'cart' && count > 0 && (
                                 <span className="rounded-full bg-primary px-2.5 py-1 font-sans text-xs font-medium text-primary-foreground">

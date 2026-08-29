@@ -56,7 +56,9 @@ export function WhatsAppFab() {
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Chat with us</DialogTitle>
+                        <DialogTitle className="font-sans">
+                            Chat with us
+                        </DialogTitle>
                         <p className="text-sm text-muted-foreground">
                             Send us a message on WhatsApp and we'll get back to
                             you.

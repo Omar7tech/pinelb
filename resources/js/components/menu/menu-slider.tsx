@@ -164,7 +164,7 @@ export function MenuSlider({ slides, enableCart = false }: MenuSliderProps) {
                                     )}
                                 >
                                     {text && (
-                                        <span className="font-heading text-2xl leading-tight font-semibold text-white drop-shadow-sm sm:text-3xl">
+                                        <span className="text-2xl leading-tight font-semibold text-white drop-shadow-sm sm:text-3xl">
                                             {text}
                                         </span>
                                     )}
