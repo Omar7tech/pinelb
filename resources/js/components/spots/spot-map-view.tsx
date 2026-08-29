@@ -19,11 +19,12 @@ interface SpotMapViewProps {
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 
-// What a marker reaches past its own point, in screen pixels: half a body to
-// each side, a teardrop's height above, and a name below. A phone draws the
-// teardrop smaller, so it reaches less — these follow `SpotPin`.
-const PIN_REACH = { halfWidth: 14, height: 38 };
-const COMPACT_PIN_REACH = { halfWidth: 11, height: 30 };
+// What a marker reaches past its own point, in screen pixels. Both shapes sit
+// centred on the point, so it's half a body in every direction — plus the name
+// below. A phone draws the dot smaller, so it reaches less; these follow
+// `SpotPin`.
+const DOT_HALF = 7;
+const COMPACT_DOT_HALF = 6;
 const LANDMARK_HALF = 8;
 const LABEL_REACH = 20;
 
@@ -42,13 +43,8 @@ function isPlaced(spot: Spot): spot is Spot & { map_x: number; map_y: number } {
 interface PinPlacement {
     /** Screen pixels to lean the marker back in from a side edge. */
     nudgeX: number;
-    /** The same, for a landmark against the top or bottom edge. */
+    /** The same, for a marker against the top or bottom edge. */
     nudgeY: number;
-    /** Where the marker sits relative to its point, before the counter-scale. */
-    offsetY: string;
-    transformOrigin: string;
-    /** Against the top edge a teardrop stands on its point instead of hanging. */
-    flipped: boolean;
     labelAbove: boolean;
     align: PinAlign;
 }
@@ -79,9 +75,8 @@ function lean(position: number, reach: number, span: number): number {
 
 /**
  * A marker near an edge is turned inwards rather than cut off by the frame: it
- * leans in by what it overhangs, a teardrop close to the top stands on its
- * point instead of hanging from it, and a name close to the bottom goes over
- * the marker instead of under it.
+ * leans in by what it overhangs, and a name close to the bottom goes over the
+ * marker instead of under it.
  */
 function placementOf(
     spot: Spot & { map_x: number; map_y: number },
@@ -89,29 +84,20 @@ function placementOf(
     plan: { width: number; height: number },
     compact: boolean,
 ): PinPlacement {
-    const pin = compact ? COMPACT_PIN_REACH : PIN_REACH;
-    const fromTop = (spot.map_y / 100) * plan.height;
-    const fromBottom = plan.height - fromTop;
-    const half = landmark ? LANDMARK_HALF : pin.halfWidth;
+    const half = landmark
+        ? LANDMARK_HALF
+        : compact
+          ? COMPACT_DOT_HALF
+          : DOT_HALF;
+    const fromBottom = plan.height - (spot.map_y / 100) * plan.height;
     // A name is turned inwards well before it would be cut, since it is far
     // wider than the marker it hangs from.
     const labelLean = lean(spot.map_x, half * 3, plan.width);
 
-    const flipped = !landmark && plan.height > 0 && fromTop < pin.height;
-    const labelAbove =
-        !flipped && plan.height > 0 && fromBottom < LABEL_REACH + half;
-
     return {
         nudgeX: lean(spot.map_x, half, plan.width),
-        nudgeY: landmark ? lean(spot.map_y, LANDMARK_HALF, plan.height) : 0,
-        offsetY: landmark ? '-50%' : flipped ? '0%' : '-100%',
-        transformOrigin: landmark
-            ? 'center'
-            : flipped
-              ? 'top center'
-              : 'bottom center',
-        flipped,
-        labelAbove,
+        nudgeY: lean(spot.map_y, half, plan.height),
+        labelAbove: plan.height > 0 && fromBottom < LABEL_REACH + half,
         align: labelLean > 0 ? 'start' : labelLean < 0 ? 'end' : 'center',
     };
 }
@@ -475,11 +461,10 @@ export function SpotMapView({
                                         // plan around it is what's scaled.
                                         transform: `translate(calc(-50% + ${
                                             placement.nudgeX / scale
-                                        }px), calc(${placement.offsetY} + ${
+                                        }px), calc(-50% + ${
                                             placement.nudgeY / scale
                                         }px)) scale(${1 / scale})`,
-                                        transformOrigin:
-                                            placement.transformOrigin,
+                                        transformOrigin: 'center',
                                     }}
                                     className={cn(
                                         'absolute transition-opacity duration-200',
@@ -494,7 +479,6 @@ export function SpotMapView({
                                         color={spot.pin_color}
                                         name={spot.name}
                                         align={placement.align}
-                                        flipped={placement.flipped}
                                         labelAbove={placement.labelAbove}
                                     />
                                 </button>

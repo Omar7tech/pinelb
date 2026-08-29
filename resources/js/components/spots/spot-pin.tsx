@@ -17,8 +17,6 @@ interface SpotPinProps {
     name?: string;
     /** Defaults to a name centred under the marker. */
     align?: PinAlign;
-    /** A teardrop that stands on its point, for a spot near the top edge. */
-    flipped?: boolean;
     /** The name goes over the marker, for a spot near the bottom edge. */
     labelAbove?: boolean;
     className?: string;
@@ -43,7 +41,9 @@ function PinLabel({
     return (
         <span
             className={cn(
-                'pointer-events-none absolute rounded-full bg-background/85 px-1.5 py-0.5 text-[0.625rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm',
+                // Smaller on a phone, where the plan is small and the names sit
+                // close enough to crowd each other.
+                'pointer-events-none absolute rounded-full bg-background/85 px-1 py-0.5 text-[0.5rem] leading-none font-medium whitespace-nowrap text-foreground shadow-sm sm:px-1.5 sm:text-[0.625rem]',
                 above ? 'bottom-full mb-1' : 'top-full mt-1',
                 LABEL_ANCHOR[align],
             )}
@@ -56,14 +56,10 @@ function PinLabel({
 /**
  * The map marker, with the spot's name under it.
  *
- * A bookable spot is a teardrop hanging by its tip from the point — anchor it
- * with `translate(-50%, -100%)`. A landmark is a small diamond centred on the
- * point instead — `translate(-50%, -50%)` — so the two are told apart by shape
- * rather than colour alone, since the colour is the admin's to choose.
- *
- * A `flipped` teardrop stands on its point rather than hanging from it, for a
- * spot so near the top of the plan that the frame would cut its body off;
- * anchor that one with `translate(-50%, 0)`.
+ * A bookable spot is a small ring with a dot in its middle, and a landmark a
+ * small diamond, so the two are told apart by shape rather than colour alone,
+ * since the colour is the admin's to choose. Both sit centred on their point —
+ * anchor either with `translate(-50%, -50%)`.
  */
 export function SpotPin({
     reserved,
@@ -71,7 +67,6 @@ export function SpotPin({
     color,
     name,
     align = 'center',
-    flipped = false,
     labelAbove = false,
     className,
 }: SpotPinProps) {
@@ -94,35 +89,29 @@ export function SpotPin({
     }
 
     return (
-        <span className={cn('relative block', className)}>
-            <svg
-                viewBox="0 0 24 34"
-                aria-hidden
-                style={color ? { color } : undefined}
+        // Smaller on a phone, where the plan itself is small and the markers
+        // crowd each other. `SpotMapView` matches these sizes when it keeps a
+        // pin off an edge.
+        <span className={cn('relative block size-3 sm:size-3.5', className)}>
+            {/* The ring is filled with the page tone rather than left open, so
+                the dot inside it reads over a busy plan. The chosen colour is
+                carried by the inline style, which is why the state tone is only
+                asked for when there isn't one. */}
+            <span
+                style={color ? { borderColor: color } : undefined}
                 className={cn(
-                    // Smaller on a phone, where the plan itself is small and a
-                    // full-size teardrop crowds its neighbours. `SpotMapView`
-                    // matches these sizes when it keeps a pin off an edge.
-                    'block h-7 w-auto drop-shadow-[0_4px_6px_rgba(15,23,42,0.45)] sm:h-9',
-                    // The chosen colour is carried by the inline style, so the
-                    // state tone is only asked for when there isn't one.
-                    !color && (reserved ? 'text-brick' : 'text-primary'),
-                    flipped && 'rotate-180',
+                    'absolute inset-0 rounded-full border-2 bg-background shadow-[0_1px_4px_rgba(15,23,42,0.45)]',
+                    !color && (reserved ? 'border-brick' : 'border-primary'),
                 )}
-            >
-                <path
-                    d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
-                    fill="currentColor"
-                    stroke="var(--color-background)"
-                    strokeWidth="1.5"
-                />
-                <circle
-                    cx="12"
-                    cy="11.5"
-                    r="4"
-                    fill="var(--color-background)"
-                />
-            </svg>
+            />
+
+            <span
+                style={color ? { backgroundColor: color } : undefined}
+                className={cn(
+                    'absolute inset-[4px] rounded-full',
+                    !color && (reserved ? 'bg-brick' : 'bg-primary'),
+                )}
+            />
 
             {name && <PinLabel name={name} align={align} above={labelAbove} />}
         </span>

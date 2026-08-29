@@ -204,9 +204,9 @@
                                     position: absolute;
                                     left: ${positions[spot.id]?.x ?? 0}%;
                                     top: ${positions[spot.id]?.y ?? 0}%;
-                                    transform: ${spot.is_reservable ? 'translate(-50%, -100%)' : 'translate(-50%, -50%)'};
-                                    width: ${spot.is_reservable ? 'auto' : '0.75rem'};
-                                    height: ${spot.is_reservable ? '2.25rem' : '0.75rem'};
+                                    transform: translate(-50%, -50%);
+                                    width: ${spot.is_reservable ? '0.875rem' : '0.75rem'};
+                                    height: ${spot.is_reservable ? '0.875rem' : '0.75rem'};
                                     padding: 0;
                                     border: 0;
                                     background: none;
@@ -216,23 +216,30 @@
                                 `"
                             >
                                 {{-- The same markers the storefront draws, so
-                                     both views agree: a teardrop hanging by its
-                                     tip for a bookable spot, a diamond centred
-                                     on the point for a landmark. --}}
-                                <svg
+                                     both views agree: a ring with a dot in it
+                                     for a bookable spot, a diamond for a
+                                     landmark, each centred on its point. --}}
+                                <span
                                     x-show="spot.is_reservable"
-                                    viewBox="0 0 24 34"
-                                    aria-hidden="true"
-                                    style="display: block; height: 2.25rem; width: auto; filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.45));"
-                                >
-                                    <path
-                                        d="M12 0.75C6.063 0.75 1.25 5.563 1.25 11.5c0 7.5 10.75 21.75 10.75 21.75S22.75 19 22.75 11.5C22.75 5.563 17.937 0.75 12 0.75Z"
-                                        x-bind:fill="pinColor(spot)"
-                                        stroke="#ffffff"
-                                        stroke-width="1.5"
-                                    />
-                                    <circle cx="12" cy="11.5" r="4" fill="#ffffff" />
-                                </svg>
+                                    x-bind:style="`
+                                        position: absolute;
+                                        inset: 0;
+                                        border: 2px solid ${pinColor(spot)};
+                                        border-radius: 9999px;
+                                        background: #ffffff;
+                                        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.45);
+                                    `"
+                                ></span>
+
+                                <span
+                                    x-show="spot.is_reservable"
+                                    x-bind:style="`
+                                        position: absolute;
+                                        inset: 4px;
+                                        border-radius: 9999px;
+                                        background: ${pinColor(spot)};
+                                    `"
+                                ></span>
 
                                 <span
                                     x-show="! spot.is_reservable"
