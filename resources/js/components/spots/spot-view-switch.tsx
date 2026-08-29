@@ -42,13 +42,18 @@ export function SpotViewSwitch({ value, onChange }: SpotViewSwitchProps) {
                         onClick={() => onChange(option.value)}
                         aria-pressed={active}
                         className={cn(
-                            'inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                            // Sized to match `SpotFilter`, which sits beside it
+                            // on a wide screen and above it on a phone.
+                            'inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs tracking-wide whitespace-nowrap uppercase transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:gap-2 sm:px-4 sm:py-2 sm:text-sm',
                             active
                                 ? 'bg-primary text-primary-foreground shadow-[0_8px_18px_-12px_rgba(120,137,108,0.9)]'
                                 : 'text-primary/70 hover:bg-primary/10 hover:text-primary',
                         )}
                     >
-                        <Icon aria-hidden className="size-4" />
+                        <Icon
+                            aria-hidden
+                            className="size-3.5 shrink-0 sm:size-4"
+                        />
                         {option.label}
                     </button>
                 );
