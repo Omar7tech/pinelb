@@ -50,7 +50,7 @@ function money(pricing: PriceParts, usd: number): string {
 
 /**
  * Build the human-readable WhatsApp order message, using WhatsApp's `*bold*`
- * markup and a numbered list so the shop can read the order at a glance.
+ * markup and a bulleted list so the shop can read the order at a glance.
  */
 export function buildOrderMessage({
     seated,
@@ -70,7 +70,7 @@ export function buildOrderMessage({
     // The heading says which kind of order this is, so the shop knows whether
     // to run it to a table or pack it for the road before reading a word more.
     const lines: string[] = [
-        seated ? '🌲 *New table order — Pine*' : '🌲 *New order — Pine*',
+        seated ? '*New table order — Pine*' : '*New order — Pine*',
         '',
     ];
 
@@ -79,15 +79,15 @@ export function buildOrderMessage({
     const table = tableName?.trim() ?? '';
 
     if (name !== '') {
-        lines.push(`👤 *Name:* ${name}`);
+        lines.push(`*Name:* ${name}`);
     }
 
     if (table !== '') {
-        lines.push(`🪑 *Table:* ${table}`);
+        lines.push(`*Table:* ${table}`);
     }
 
     if (phone !== '') {
-        lines.push(`📱 *Phone:* ${phone}`);
+        lines.push(`*Phone:* ${phone}`);
     }
 
     if (location) {
@@ -97,10 +97,10 @@ export function buildOrderMessage({
             accuracy > 100 ? ` (approx. ±${accuracy}m)` : ` (±${accuracy}m)`;
 
         lines.push(
-            `📍 *Location:* https://maps.google.com/?q=${location.latitude},${location.longitude}${precision}`,
+            `*Location:* https://maps.google.com/?q=${location.latitude},${location.longitude}${precision}`,
         );
     } else if (locationPending) {
-        lines.push('📍 *Location:* will be shared in this chat 👇');
+        lines.push('*Location:* will be shared in this chat below');
     }
 
     if (
@@ -113,13 +113,15 @@ export function buildOrderMessage({
         lines.push('');
     }
 
-    items.forEach((item, index) => {
+    items.forEach((item) => {
         const lineTotalUsd = cartItemUnitUsd(item) * item.quantity;
         const title = item.variantName
             ? `${item.title} — ${item.variantName}`
             : item.title;
 
-        lines.push(`*${index + 1}. ${title}*`);
+        // A bullet rather than a number: a leading "3." next to a line that
+        // already reads "2 ×" invites the two to be read as the same count.
+        lines.push(`• *${title}*`);
         lines.push(
             `   ${item.quantity} × ${money(pricing, item.unitUsd)} = ${money(pricing, item.unitUsd * item.quantity)}`,
         );
@@ -128,7 +130,7 @@ export function buildOrderMessage({
             const addonTotalUsd = addon.price * addon.quantity * item.quantity;
 
             lines.push(
-                `   ➕ ${addon.quantity * item.quantity}× ${addon.name} (+${money(pricing, addonTotalUsd)})`,
+                `   + ${addon.quantity * item.quantity}× ${addon.name} (+${money(pricing, addonTotalUsd)})`,
             );
         });
 
@@ -139,7 +141,7 @@ export function buildOrderMessage({
         const note = item.note?.trim() ?? '';
 
         if (note !== '') {
-            lines.push(`   📝 _${note}_`);
+            lines.push(`   Note: _${note}_`);
         }
 
         lines.push('');
@@ -157,7 +159,7 @@ export function buildOrderMessage({
     const note = orderNote?.trim() ?? '';
 
     if (note !== '') {
-        lines.push('', divider, `📝 *Order note:* ${note}`);
+        lines.push('', divider, `*Order note:* ${note}`);
     }
 
     return lines.join('\n');
