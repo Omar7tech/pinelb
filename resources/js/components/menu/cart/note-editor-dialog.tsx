@@ -34,7 +34,7 @@ export function NoteEditorDialog({
         >
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="font-sans">Add a note</DialogTitle>
+                    <DialogTitle>Add a note</DialogTitle>
                     <DialogDescription>
                         {title === null ? '' : `For ${title}`}
                     </DialogDescription>

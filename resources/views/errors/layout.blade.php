@@ -28,9 +28,9 @@
             </a>
 
             <section class="w-full max-w-md rounded-[1.75rem] border border-primary/20 bg-primary/5 px-6 py-10 text-center sm:px-10">
-                {{-- The status code carries the page, set in the same serif as
-                     the wordmark; the words under it say what it means. --}}
-                <p class="font-heading text-7xl leading-none font-semibold text-primary sm:text-8xl">@yield('code')</p>
+                {{-- The status code carries the page; the words under it say
+                     what it means. --}}
+                <p class="text-7xl leading-none font-semibold text-primary sm:text-8xl">@yield('code')</p>
 
                 <div class="mx-auto mt-7 h-px w-10 bg-primary/25"></div>
 

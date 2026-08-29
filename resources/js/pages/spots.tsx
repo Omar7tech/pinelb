@@ -93,7 +93,7 @@ export default function Spots({ spots, mapImage }: SpotsProps) {
                     <header className="flex flex-col gap-4 border-b border-primary/15 pb-4">
                         <h1
                             dir="rtl"
-                            className="text-right font-sans text-3xl leading-tight font-semibold tracking-normal text-primary md:text-4xl"
+                            className="text-right text-3xl leading-tight font-semibold tracking-normal text-primary md:text-4xl"
                         >
                             احجز قعدتك
                         </h1>

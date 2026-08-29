@@ -74,7 +74,7 @@ function SpotCardComponent({ spot }: SpotCardProps) {
                     <h2
                         dir={rtl ? 'rtl' : undefined}
                         className={cn(
-                            'min-w-0 font-heading text-xl leading-tight font-semibold text-primary',
+                            'min-w-0 text-xl leading-tight font-semibold text-primary',
                             rtl && 'text-right',
                         )}
                     >
