@@ -12,11 +12,18 @@ import type { TableSpot } from '@/types';
 /**
  * Where the customer is in the checkout flow.
  *
- * `cart` → (`details`) → `note` → (`locating` → `location-error`) → `sending`.
- * The bracketed steps only appear when the shop asks for those things.
+ * `cart` → (`details`) → (`spot`) → `note` → (`locating` → `location-error`)
+ * → `sending`. The bracketed steps only appear when the order asks for those
+ * things: `spot` on a table order, the location pair on a delivery.
  */
 export type CheckoutStep =
-    'cart' | 'details' | 'note' | 'locating' | 'location-error' | 'sending';
+    | 'cart'
+    | 'details'
+    | 'spot'
+    | 'note'
+    | 'locating'
+    | 'location-error'
+    | 'sending';
 
 const NAME_STORAGE_KEY = 'pine-customer-name';
 const PHONE_STORAGE_KEY = 'pine-customer-phone';
@@ -80,13 +87,16 @@ export function useCheckout({
     totalUsd,
 }: CheckoutInput) {
     const { checkout } = usePage().props;
-    const { requirePhoneNumber, getClientLocation } = checkout;
+    const { getClientLocation } = checkout;
     const tableMode = mode === 'table';
     // A table order has to say who it belongs to and which table it goes to, so
     // those two are asked for whatever the shop's own switches say. The name
     // switch still governs delivery on its own.
     const requireFullName = tableMode || checkout.requireFullName;
     const requireSpot = tableMode;
+    // Nothing is phoned through to a table, so a table order never asks for a
+    // number even where the shop wants one on a delivery.
+    const requirePhoneNumber = !tableMode && checkout.requirePhoneNumber;
     // The customer is already here, so a table order never asks where they are.
     const wantsLocation = getClientLocation && !tableMode;
     // Orders can only be sent while the shop is open.
@@ -117,8 +127,8 @@ export function useCheckout({
     const detailsValid =
         (!requireFullName || trimmedName !== '') &&
         (!requirePhoneNumber ||
-            phoneDigitCount(trimmedPhone) >= PHONE_MIN_DIGITS) &&
-        (!requireSpot || selectedSpot !== null);
+            phoneDigitCount(trimmedPhone) >= PHONE_MIN_DIGITS);
+    const spotValid = !requireSpot || selectedSpot !== null;
 
     /** Reset the flow back to the item list, e.g. when the sheet is closed. */
     const reset = useCallback((): void => {
@@ -225,11 +235,13 @@ export function useCheckout({
             return;
         }
 
-        setStep(
-            requireFullName || requirePhoneNumber || requireSpot
-                ? 'details'
-                : 'note',
-        );
+        if (requireFullName || requirePhoneNumber) {
+            setStep('details');
+
+            return;
+        }
+
+        setStep(requireSpot ? 'spot' : 'note');
     }, [canSend, requireFullName, requirePhoneNumber, requireSpot]);
 
     const confirmDetails = useCallback((): void => {
@@ -247,24 +259,42 @@ export function useCheckout({
             setPhone(trimmedPhone);
         }
 
-        setStep('note');
+        // A table order picks its table next; a delivery has everything it
+        // needs and goes straight to the note.
+        setStep(requireSpot ? 'spot' : 'note');
     }, [
         detailsValid,
         requireFullName,
         requirePhoneNumber,
+        requireSpot,
         trimmedName,
         trimmedPhone,
     ]);
 
     const confirmNote = useCallback((): void => beginSend(), [beginSend]);
 
-    /** Step back from the note step to details, or to the item list. */
+    const confirmSpot = useCallback((): void => {
+        if (!spotValid) {
+            return;
+        }
+
+        setStep('note');
+    }, [spotValid]);
+
+    /** Step back from the table step to the details, or to the item list. */
+    const spotBack = useCallback((): void => {
+        setStep(requireFullName || requirePhoneNumber ? 'details' : 'cart');
+    }, [requireFullName, requirePhoneNumber]);
+
+    /** Step back from the note to whichever step actually came before it. */
     const noteBack = useCallback((): void => {
-        setStep(
-            requireFullName || requirePhoneNumber || requireSpot
-                ? 'details'
-                : 'cart',
-        );
+        if (requireSpot) {
+            setStep('spot');
+
+            return;
+        }
+
+        setStep(requireFullName || requirePhoneNumber ? 'details' : 'cart');
     }, [requireFullName, requirePhoneNumber, requireSpot]);
 
     /** Send anyway, flagging that the customer will share a pin in the chat. */
@@ -284,6 +314,7 @@ export function useCheckout({
         shopOpen,
         canSend,
         detailsValid,
+        spotValid,
         locationDenied,
         whatsappUrl,
         name,
@@ -295,6 +326,8 @@ export function useCheckout({
         reset,
         startCheckout,
         confirmDetails,
+        confirmSpot,
+        spotBack,
         confirmNote,
         noteBack,
         retryLocation: beginSend,

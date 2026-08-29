@@ -37,7 +37,7 @@ export const CART_COPY: Record<CartMode, CartCopy> = {
         add: (title) => `Add ${title} to the table`,
         title: 'Your table',
         emptyTitle: 'Nothing on your table yet',
-        detailsHint: 'Tell us who you are and where you’re sitting.',
+        detailsHint: 'Tell us who the order is for.',
         clear: 'Clear the table',
         clearConfirm: 'Tap again to clear',
     },

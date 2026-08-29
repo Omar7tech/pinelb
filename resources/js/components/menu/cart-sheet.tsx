@@ -8,6 +8,7 @@ import {
     LocationErrorStep,
     NoteStep,
     SendingStep,
+    SpotStep,
 } from '@/components/menu/cart/checkout-panels';
 import { NoteEditorDialog } from '@/components/menu/cart/note-editor-dialog';
 import {
@@ -26,6 +27,7 @@ import type { TableSpot } from '@/types';
 /** The heading shown for each step of the flow past the item list. */
 const STEP_TITLES = {
     details: 'Your details',
+    spot: 'Your spot',
     note: 'Add a note',
     locating: 'Your location',
     'location-error': 'Your location',
@@ -138,10 +140,6 @@ export function CartSheet({ whatsappNumber, spots = [] }: CartSheetProps) {
                         <DetailsStep
                             requireFullName={checkout.requireFullName}
                             requirePhoneNumber={checkout.requirePhoneNumber}
-                            requireSpot={checkout.requireSpot}
-                            spots={checkout.spots}
-                            spotId={checkout.spotId}
-                            onSpotChange={checkout.setSpotId}
                             hint={copy.detailsHint}
                             backLabel={`Back to ${copy.title.toLowerCase()}`}
                             name={checkout.name}
@@ -151,6 +149,17 @@ export function CartSheet({ whatsappNumber, spots = [] }: CartSheetProps) {
                             valid={checkout.detailsValid}
                             onBack={checkout.backToCart}
                             onConfirm={checkout.confirmDetails}
+                        />
+                    )}
+
+                    {checkout.step === 'spot' && (
+                        <SpotStep
+                            spots={checkout.spots}
+                            spotId={checkout.spotId}
+                            onSpotChange={checkout.setSpotId}
+                            valid={checkout.spotValid}
+                            onBack={checkout.spotBack}
+                            onConfirm={checkout.confirmSpot}
                         />
                     )}
 

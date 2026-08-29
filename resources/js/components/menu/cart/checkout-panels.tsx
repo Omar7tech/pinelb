@@ -1,7 +1,6 @@
 import {
     ArrowLeft,
     ArrowRight,
-    ChevronDown,
     Loader2,
     MapPin,
     MapPinOff,
@@ -25,11 +24,6 @@ const field =
 interface DetailsStepProps {
     requireFullName: boolean;
     requirePhoneNumber: boolean;
-    /** True on a table order, where the customer picks where they're sitting. */
-    requireSpot: boolean;
-    spots: TableSpot[];
-    spotId: number | null;
-    onSpotChange: (value: number | null) => void;
     /** The line above the fields, which differs between the two carts. */
     hint: string;
     /** The label on the button that steps back to the item list. */
@@ -43,14 +37,10 @@ interface DetailsStepProps {
     onConfirm: () => void;
 }
 
-/** Collects the name, table and/or phone number the shop asks for. */
+/** Collects the name and/or phone number the shop asks for. */
 export function DetailsStep({
     requireFullName,
     requirePhoneNumber,
-    requireSpot,
-    spots,
-    spotId,
-    onSpotChange,
     hint,
     backLabel,
     name,
@@ -76,45 +66,13 @@ export function DetailsStep({
         >
             <p className="text-sm text-muted-foreground">{hint}</p>
 
-            {requireSpot && (
-                <label className="flex flex-col gap-1.5">
-                    <span className="text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
-                        Where are you sitting?
-                    </span>
-                    <div className="relative">
-                        <select
-                            value={spotId ?? ''}
-                            onChange={(event) =>
-                                onSpotChange(
-                                    event.target.value === ''
-                                        ? null
-                                        : Number(event.target.value),
-                                )
-                            }
-                            className={cn(field, 'appearance-none pr-10')}
-                        >
-                            <option value="">Choose your spot</option>
-                            {spots.map((spot) => (
-                                <option key={spot.id} value={spot.id}>
-                                    {spot.name}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown
-                            aria-hidden
-                            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-primary/60"
-                        />
-                    </div>
-                </label>
-            )}
-
             {requireFullName && (
                 <label className="flex flex-col gap-1.5">
                     <span className="text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
                         Full name
                     </span>
                     <input
-                        autoFocus={!requireSpot}
+                        autoFocus
                         value={name}
                         onChange={(event) => onNameChange(event.target.value)}
                         placeholder="Your name"
@@ -131,7 +89,7 @@ export function DetailsStep({
                     <input
                         type="tel"
                         inputMode="tel"
-                        autoFocus={!requireFullName && !requireSpot}
+                        autoFocus={!requireFullName}
                         value={phone}
                         onChange={(event) => onPhoneChange(event.target.value)}
                         placeholder="e.g. 70 123 456"
@@ -160,6 +118,118 @@ export function DetailsStep({
                 <button type="button" onClick={onBack} className={ghostAction}>
                     <ArrowLeft className="size-4" />
                     {backLabel}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+interface SpotStepProps {
+    spots: TableSpot[];
+    spotId: number | null;
+    onSpotChange: (value: number) => void;
+    valid: boolean;
+    onBack: () => void;
+    onConfirm: () => void;
+}
+
+/**
+ * Where the customer is sitting, as a list of radios rather than a dropdown:
+ * every spot is a name the customer has to recognise from the place around
+ * them, and a list shows them all at once instead of one at a time.
+ */
+export function SpotStep({
+    spots,
+    spotId,
+    onSpotChange,
+    valid,
+    onBack,
+    onConfirm,
+}: SpotStepProps) {
+    return (
+        <form
+            onSubmit={(event) => {
+                event.preventDefault();
+                onConfirm();
+            }}
+            className="flex min-h-0 flex-1 flex-col"
+        >
+            <p className="shrink-0 px-5 pt-5 text-sm text-muted-foreground">
+                Pick the spot you&rsquo;re sitting at, so we bring your order to
+                the right place.
+            </p>
+
+            <div
+                role="radiogroup"
+                aria-label="Your spot"
+                className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-5"
+            >
+                {spots.map((spot) => {
+                    const selected = spot.id === spotId;
+
+                    return (
+                        <label
+                            key={spot.id}
+                            className={cn(
+                                'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition-colors',
+                                selected
+                                    ? 'border-primary bg-primary/10'
+                                    : 'border-primary/20 bg-primary/5 hover:bg-primary/10',
+                                // The ring follows the input's focus, since the
+                                // input itself is visually hidden.
+                                'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
+                            )}
+                        >
+                            <input
+                                type="radio"
+                                name="spot"
+                                value={spot.id}
+                                checked={selected}
+                                onChange={() => onSpotChange(spot.id)}
+                                className="sr-only"
+                            />
+
+                            <span
+                                aria-hidden
+                                className={cn(
+                                    'flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+                                    selected
+                                        ? 'border-primary'
+                                        : 'border-primary/35',
+                                )}
+                            >
+                                {selected && (
+                                    <span className="size-2.5 rounded-full bg-primary" />
+                                )}
+                            </span>
+
+                            <span
+                                className={cn(
+                                    'min-w-0 flex-1 truncate text-sm',
+                                    selected
+                                        ? 'text-primary'
+                                        : 'text-foreground/80',
+                                )}
+                            >
+                                {spot.name}
+                            </span>
+                        </label>
+                    );
+                })}
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-2 border-t border-primary/15 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+                <button
+                    type="submit"
+                    disabled={!valid}
+                    className={primaryAction}
+                >
+                    Continue
+                    <ArrowRight className="size-4" />
+                </button>
+                <button type="button" onClick={onBack} className={ghostAction}>
+                    <ArrowLeft className="size-4" />
+                    Back
                 </button>
             </div>
         </form>
