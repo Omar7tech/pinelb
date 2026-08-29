@@ -9,6 +9,13 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
+/**
+ * What the cart is being built for: an order delivered to an address, or one
+ * seated at a table. It only changes the wording and what checkout asks for —
+ * the items themselves behave identically.
+ */
+export type CartMode = 'delivery' | 'table';
+
 export type CartAddon = {
     name: string;
     /** Unit price of the add-on in USD. */
@@ -89,6 +96,9 @@ type CartContextValue = CartState & CartActions;
 // actions (a product card's "add") don't re-render when the cart changes.
 const CartStateContext = createContext<CartState | null>(null);
 const CartActionsContext = createContext<CartActions | null>(null);
+// The mode never changes within a page, so it sits in its own context rather
+// than re-rendering every cart consumer alongside the items.
+const CartModeContext = createContext<CartMode>('delivery');
 
 const STORAGE_KEY = 'pine-cart';
 
@@ -113,7 +123,13 @@ function readStoredItems(): CartItem[] {
     }
 }
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({
+    mode = 'delivery',
+    children,
+}: {
+    mode?: CartMode;
+    children: ReactNode;
+}) {
     const [items, setItems] = useState<CartItem[]>(readStoredItems);
     const [open, setOpen] = useState(false);
     const [lastAdded, setLastAdded] = useState<{
@@ -237,10 +253,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
 
     return (
-        <CartActionsContext value={actions}>
-            <CartStateContext value={state}>{children}</CartStateContext>
-        </CartActionsContext>
+        <CartModeContext value={mode}>
+            <CartActionsContext value={actions}>
+                <CartStateContext value={state}>{children}</CartStateContext>
+            </CartActionsContext>
+        </CartModeContext>
     );
+}
+
+/** Whether this cart is a delivery order or a table order. */
+export function useCartMode(): CartMode {
+    return useContext(CartModeContext);
 }
 
 /** Cart mutators only; identity is stable so consumers don't re-render. */

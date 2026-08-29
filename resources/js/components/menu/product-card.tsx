@@ -7,7 +7,8 @@ import { VariantSelector } from '@/components/menu/variant-selector';
 import { PineMark } from '@/components/pine-logo';
 import { SmartImage } from '@/components/smart-image';
 import type { CartAddon } from '@/contexts/cart-context';
-import { useCartActions } from '@/contexts/cart-context';
+import { useCartActions, useCartMode } from '@/contexts/cart-context';
+import { CART_COPY } from '@/lib/cart-copy';
 import { cn, isArabic } from '@/lib/utils';
 import type { CategoryAddon, Product } from '@/types';
 
@@ -15,14 +16,14 @@ interface ProductCardProps {
     product: Product;
     /** Add-ons from the product's category; empty when none are configured. */
     addons?: CategoryAddon[];
-    /** Whether add-to-cart actions are offered (the delivery menu only). */
+    /** Whether ordering actions are offered on this menu. */
     enableCart?: boolean;
 }
 
 /**
  * A single menu item: thumbnail, name, short copy and price, with the variant
  * picker underneath when the item has options. Tapping anywhere opens the full
- * details dialog; on the delivery menu a quick-add button sits alongside.
+ * details dialog; where ordering is offered a quick-add button sits alongside.
  */
 function ProductCardComponent({
     product,
@@ -30,6 +31,7 @@ function ProductCardComponent({
     enableCart = false,
 }: ProductCardProps) {
     const { addItem } = useCartActions();
+    const mode = useCartMode();
     const variants = product.variants ?? [];
     const hasVariants = variants.length > 0;
 
@@ -163,7 +165,9 @@ function ProductCardComponent({
                                 <button
                                     type="button"
                                     onClick={handleQuickAdd}
-                                    aria-label={`Add ${product.title} to cart`}
+                                    aria-label={CART_COPY[mode].add(
+                                        product.title,
+                                    )}
                                     className="pointer-events-auto relative z-10 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 >
                                     <Plus className="size-4" />

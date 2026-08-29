@@ -4,6 +4,8 @@ import type { PriceParts } from '@/hooks/use-pricing';
 import type { LocationResult } from '@/lib/geolocation';
 
 type OrderSummary = {
+    /** True for an order seated at a table rather than sent to an address. */
+    seated?: boolean;
     items: CartItem[];
     pricing: PriceParts;
     subtotalUsd: number;
@@ -14,6 +16,8 @@ type OrderSummary = {
     customerName?: string | null;
     /** The customer's phone number, included when one is required. */
     customerPhone?: string | null;
+    /** The table the order is seated at, on a dine-in order. */
+    tableName?: string | null;
     /** The customer's coordinates, included when location sharing succeeded. */
     location?: LocationResult | null;
     /**
@@ -49,6 +53,7 @@ function money(pricing: PriceParts, usd: number): string {
  * markup and a numbered list so the shop can read the order at a glance.
  */
 export function buildOrderMessage({
+    seated,
     items,
     pricing,
     subtotalUsd,
@@ -56,18 +61,29 @@ export function buildOrderMessage({
     totalUsd,
     customerName,
     customerPhone,
+    tableName,
     location,
     locationPending,
     orderNote,
 }: OrderSummary): string {
     const divider = '———————————————';
-    const lines: string[] = ['🌲 *New order — Pine*', ''];
+    // The heading says which kind of order this is, so the shop knows whether
+    // to run it to a table or pack it for the road before reading a word more.
+    const lines: string[] = [
+        seated ? '🌲 *New table order — Pine*' : '🌲 *New order — Pine*',
+        '',
+    ];
 
     const name = customerName?.trim() ?? '';
     const phone = customerPhone?.trim() ?? '';
+    const table = tableName?.trim() ?? '';
 
     if (name !== '') {
         lines.push(`👤 *Name:* ${name}`);
+    }
+
+    if (table !== '') {
+        lines.push(`🪑 *Table:* ${table}`);
     }
 
     if (phone !== '') {
@@ -87,7 +103,13 @@ export function buildOrderMessage({
         lines.push('📍 *Location:* will be shared in this chat 👇');
     }
 
-    if (name !== '' || phone !== '' || location || locationPending) {
+    if (
+        name !== '' ||
+        table !== '' ||
+        phone !== '' ||
+        location ||
+        locationPending
+    ) {
         lines.push('');
     }
 

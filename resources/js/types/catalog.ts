@@ -25,6 +25,15 @@ export type Product = {
     thumb: string | null;
 };
 
+/**
+ * A table a dine-in order can be seated at — the bookable spots that are
+ * switched on, as the dine-in menu is handed them.
+ */
+export type TableSpot = {
+    id: number;
+    name: string;
+};
+
 export type CategoryAddon = {
     name: string;
     price: number;

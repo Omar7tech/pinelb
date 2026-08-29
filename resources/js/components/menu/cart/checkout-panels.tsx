@@ -1,6 +1,7 @@
 import {
     ArrowLeft,
     ArrowRight,
+    ChevronDown,
     Loader2,
     MapPin,
     MapPinOff,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 import { phoneDigitCount } from '@/hooks/use-checkout';
 import { cn } from '@/lib/utils';
+import type { TableSpot } from '@/types';
 
 /** The filled action that advances the flow. */
 const primaryAction =
@@ -23,6 +25,15 @@ const field =
 interface DetailsStepProps {
     requireFullName: boolean;
     requirePhoneNumber: boolean;
+    /** True on a table order, where the customer picks where they're sitting. */
+    requireSpot: boolean;
+    spots: TableSpot[];
+    spotId: number | null;
+    onSpotChange: (value: number | null) => void;
+    /** The line above the fields, which differs between the two carts. */
+    hint: string;
+    /** The label on the button that steps back to the item list. */
+    backLabel: string;
     name: string;
     onNameChange: (value: string) => void;
     phone: string;
@@ -32,10 +43,16 @@ interface DetailsStepProps {
     onConfirm: () => void;
 }
 
-/** Collects the name and/or phone number the shop asks for. */
+/** Collects the name, table and/or phone number the shop asks for. */
 export function DetailsStep({
     requireFullName,
     requirePhoneNumber,
+    requireSpot,
+    spots,
+    spotId,
+    onSpotChange,
+    hint,
+    backLabel,
     name,
     onNameChange,
     phone,
@@ -57,9 +74,39 @@ export function DetailsStep({
             }}
             className="flex flex-col gap-4 p-5"
         >
-            <p className="text-sm text-muted-foreground">
-                We just need a couple of details to get your order to you.
-            </p>
+            <p className="text-sm text-muted-foreground">{hint}</p>
+
+            {requireSpot && (
+                <label className="flex flex-col gap-1.5">
+                    <span className="text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
+                        Where are you sitting?
+                    </span>
+                    <div className="relative">
+                        <select
+                            value={spotId ?? ''}
+                            onChange={(event) =>
+                                onSpotChange(
+                                    event.target.value === ''
+                                        ? null
+                                        : Number(event.target.value),
+                                )
+                            }
+                            className={cn(field, 'appearance-none pr-10')}
+                        >
+                            <option value="">Choose your spot</option>
+                            {spots.map((spot) => (
+                                <option key={spot.id} value={spot.id}>
+                                    {spot.name}
+                                </option>
+                            ))}
+                        </select>
+                        <ChevronDown
+                            aria-hidden
+                            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-primary/60"
+                        />
+                    </div>
+                </label>
+            )}
 
             {requireFullName && (
                 <label className="flex flex-col gap-1.5">
@@ -67,7 +114,7 @@ export function DetailsStep({
                         Full name
                     </span>
                     <input
-                        autoFocus
+                        autoFocus={!requireSpot}
                         value={name}
                         onChange={(event) => onNameChange(event.target.value)}
                         placeholder="Your name"
@@ -84,7 +131,7 @@ export function DetailsStep({
                     <input
                         type="tel"
                         inputMode="tel"
-                        autoFocus={!requireFullName}
+                        autoFocus={!requireFullName && !requireSpot}
                         value={phone}
                         onChange={(event) => onPhoneChange(event.target.value)}
                         placeholder="e.g. 70 123 456"
@@ -112,7 +159,7 @@ export function DetailsStep({
                 </button>
                 <button type="button" onClick={onBack} className={ghostAction}>
                     <ArrowLeft className="size-4" />
-                    Back to cart
+                    {backLabel}
                 </button>
             </div>
         </form>

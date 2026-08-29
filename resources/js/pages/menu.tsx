@@ -14,13 +14,17 @@ import { SiteHeader } from '@/components/menu/site-header';
 import { WhatsAppFab } from '@/components/menu/whatsapp-fab';
 import { PageHead } from '@/components/page-head';
 import { CartProvider } from '@/contexts/cart-context';
-import type { Category, OrderType, Slide } from '@/types';
+import type { Category, OrderType, Slide, TableSpot } from '@/types';
 
 interface MenuProps {
     orderType: OrderType;
     orderTypeLabel: string;
     categories: Category[];
     slides: Slide[];
+    /** The number an order sent from this menu goes to. */
+    orderWhatsappNumber: string | null;
+    /** The tables a dine-in order can be seated at; empty on the delivery menu. */
+    tableSpots: TableSpot[];
 }
 
 /** The category whose slug is in `?category=`, or null for the boxes view. */
@@ -43,6 +47,8 @@ export default function Menu({
     orderTypeLabel,
     categories,
     slides,
+    orderWhatsappNumber,
+    tableSpots,
 }: MenuProps) {
     // Null shows the category boxes; a category id shows that category's items.
     const [activeId, setActiveId] = useState<number | null>(() =>
@@ -80,11 +86,16 @@ export default function Menu({
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Ordering only exists on the delivery menu; dine-in stays read-only.
-    const cartEnabled = orderType === 'delivery';
+    // A dine-in order is put on a table, so it needs somewhere to be sent and a
+    // table to be seated at — without either the menu stays read-only.
+    const tableOrdering =
+        orderType === 'dine_in' &&
+        tableSpots.length > 0 &&
+        orderWhatsappNumber !== null;
+    const cartEnabled = orderType === 'delivery' || tableOrdering;
 
     return (
-        <CartProvider>
+        <CartProvider mode={tableOrdering ? 'table' : 'delivery'}>
             <PageHead />
 
             <div className="flex min-h-svh flex-col">
@@ -158,7 +169,12 @@ export default function Menu({
                 />
             </div>
 
-            {cartEnabled && <CartSheet />}
+            {cartEnabled && (
+                <CartSheet
+                    whatsappNumber={orderWhatsappNumber}
+                    spots={tableSpots}
+                />
+            )}
             {cartEnabled && <CartToast />}
 
             <WhatsAppFab />

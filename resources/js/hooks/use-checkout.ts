@@ -1,12 +1,13 @@
 import { usePage } from '@inertiajs/react';
 import { useCallback, useRef, useState } from 'react';
-import type { CartItem } from '@/contexts/cart-context';
+import type { CartItem, CartMode } from '@/contexts/cart-context';
 import type { PriceParts } from '@/hooks/use-pricing';
 import { getBestLocation, isPermissionDenied } from '@/lib/geolocation';
 import type { LocationResult } from '@/lib/geolocation';
 import { useShopOpen } from '@/lib/shop';
 import { buildWhatsAppUrl } from '@/lib/whatsapp';
 import { buildOrderMessage } from '@/lib/whatsapp-order';
+import type { TableSpot } from '@/types';
 
 /**
  * Where the customer is in the checkout flow.
@@ -51,6 +52,12 @@ function store(key: string, value: string): void {
 }
 
 type CheckoutInput = {
+    /** Whether this order is delivered to an address or seated at a table. */
+    mode: CartMode;
+    /** The number this menu's orders are sent to. */
+    whatsappNumber: string | null;
+    /** The tables an order can be seated at; empty in delivery mode. */
+    spots: TableSpot[];
     items: CartItem[];
     pricing: PriceParts;
     subtotalUsd: number;
@@ -63,20 +70,34 @@ type CheckoutInput = {
  * the location lookup, and the hand-off to WhatsApp.
  */
 export function useCheckout({
+    mode,
+    whatsappNumber,
+    spots,
     items,
     pricing,
     subtotalUsd,
     deliveryFeeUsd,
     totalUsd,
 }: CheckoutInput) {
-    const { whatsappNumber, checkout } = usePage().props;
-    const { requireFullName, requirePhoneNumber, getClientLocation } = checkout;
+    const { checkout } = usePage().props;
+    const { requirePhoneNumber, getClientLocation } = checkout;
+    const tableMode = mode === 'table';
+    // A table order has to say who it belongs to and which table it goes to, so
+    // those two are asked for whatever the shop's own switches say. The name
+    // switch still governs delivery on its own.
+    const requireFullName = tableMode || checkout.requireFullName;
+    const requireSpot = tableMode;
+    // The customer is already here, so a table order never asks where they are.
+    const wantsLocation = getClientLocation && !tableMode;
     // Orders can only be sent while the shop is open.
     const shopOpen = useShopOpen();
 
     const [step, setStep] = useState<CheckoutStep>('cart');
     const [name, setName] = useState(() => readStored(NAME_STORAGE_KEY));
     const [phone, setPhone] = useState(() => readStored(PHONE_STORAGE_KEY));
+    // The chosen table. Deliberately not remembered between visits the way the
+    // name is — a customer sits somewhere new each time.
+    const [spotId, setSpotId] = useState<number | null>(null);
     const [orderNote, setOrderNote] = useState('');
     // True when the location failure was an explicit denial rather than a
     // timeout, so the panel can show the right instructions.
@@ -92,10 +113,12 @@ export function useCheckout({
     const canSend = whatsappNumber !== null && items.length > 0 && shopOpen;
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
+    const selectedSpot = spots.find((spot) => spot.id === spotId) ?? null;
     const detailsValid =
         (!requireFullName || trimmedName !== '') &&
         (!requirePhoneNumber ||
-            phoneDigitCount(trimmedPhone) >= PHONE_MIN_DIGITS);
+            phoneDigitCount(trimmedPhone) >= PHONE_MIN_DIGITS) &&
+        (!requireSpot || selectedSpot !== null);
 
     /** Reset the flow back to the item list, e.g. when the sheet is closed. */
     const reset = useCallback((): void => {
@@ -121,6 +144,7 @@ export function useCheckout({
             sentRef.current = true;
 
             const message = buildOrderMessage({
+                seated: tableMode,
                 items,
                 pricing,
                 subtotalUsd,
@@ -128,6 +152,7 @@ export function useCheckout({
                 totalUsd,
                 customerName: requireFullName ? name.trim() : null,
                 customerPhone: requirePhoneNumber ? phone.trim() : null,
+                tableName: selectedSpot?.name ?? null,
                 location,
                 locationPending,
                 orderNote,
@@ -153,10 +178,12 @@ export function useCheckout({
             subtotalUsd,
             deliveryFeeUsd,
             totalUsd,
+            tableMode,
             requireFullName,
             requirePhoneNumber,
             name,
             phone,
+            selectedSpot,
             orderNote,
         ],
     );
@@ -168,7 +195,7 @@ export function useCheckout({
     const beginSend = useCallback((): void => {
         sentRef.current = false;
 
-        if (!getClientLocation) {
+        if (!wantsLocation) {
             sendOrder(null, false);
 
             return;
@@ -190,7 +217,7 @@ export function useCheckout({
                 setLocationDenied(isPermissionDenied(error));
                 setStep('location-error');
             });
-    }, [getClientLocation, sendOrder]);
+    }, [wantsLocation, sendOrder]);
 
     /** Leave the item list for the first step the shop actually asks for. */
     const startCheckout = useCallback((): void => {
@@ -198,8 +225,12 @@ export function useCheckout({
             return;
         }
 
-        setStep(requireFullName || requirePhoneNumber ? 'details' : 'note');
-    }, [canSend, requireFullName, requirePhoneNumber]);
+        setStep(
+            requireFullName || requirePhoneNumber || requireSpot
+                ? 'details'
+                : 'note',
+        );
+    }, [canSend, requireFullName, requirePhoneNumber, requireSpot]);
 
     const confirmDetails = useCallback((): void => {
         if (!detailsValid) {
@@ -229,8 +260,12 @@ export function useCheckout({
 
     /** Step back from the note step to details, or to the item list. */
     const noteBack = useCallback((): void => {
-        setStep(requireFullName || requirePhoneNumber ? 'details' : 'cart');
-    }, [requireFullName, requirePhoneNumber]);
+        setStep(
+            requireFullName || requirePhoneNumber || requireSpot
+                ? 'details'
+                : 'cart',
+        );
+    }, [requireFullName, requirePhoneNumber, requireSpot]);
 
     /** Send anyway, flagging that the customer will share a pin in the chat. */
     const sendWithoutLocation = useCallback((): void => {
@@ -242,6 +277,10 @@ export function useCheckout({
         step,
         requireFullName,
         requirePhoneNumber,
+        requireSpot,
+        spots,
+        spotId,
+        setSpotId,
         shopOpen,
         canSend,
         detailsValid,

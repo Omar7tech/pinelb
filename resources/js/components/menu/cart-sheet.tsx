@@ -16,14 +16,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { useCart } from '@/contexts/cart-context';
+import { useCart, useCartMode } from '@/contexts/cart-context';
 import { useCheckout } from '@/hooks/use-checkout';
 import { usePricing } from '@/hooks/use-pricing';
+import { CART_COPY } from '@/lib/cart-copy';
 import { nextOpeningLabel, useShop } from '@/lib/shop';
+import type { TableSpot } from '@/types';
 
-/** The heading shown for each step of the flow. */
+/** The heading shown for each step of the flow past the item list. */
 const STEP_TITLES = {
-    cart: 'Your order',
     details: 'Your details',
     note: 'Add a note',
     locating: 'Your location',
@@ -31,12 +32,21 @@ const STEP_TITLES = {
     sending: 'Sending',
 } as const;
 
+interface CartSheetProps {
+    /** The number this menu's orders are sent to. */
+    whatsappNumber: string | null;
+    /** The tables an order can be seated at; empty on the delivery menu. */
+    spots?: TableSpot[];
+}
+
 /**
  * The cart and checkout, as a bottom sheet on mobile and a centered modal on
  * desktop. Walks from the item list through whichever details the shop asks for
  * and hands the finished order off to WhatsApp.
  */
-export function CartSheet() {
+export function CartSheet({ whatsappNumber, spots = [] }: CartSheetProps) {
+    const mode = useCartMode();
+    const copy = CART_COPY[mode];
     const {
         items,
         open,
@@ -54,11 +64,16 @@ export function CartSheet() {
     // When the shop is closed, tell the customer when it opens again.
     const opensLabel = nextOpeningLabel(shop);
 
-    // Delivery is only charged when there is something to deliver.
-    const deliveryFeeUsd = items.length > 0 ? pricing.deliveryFeeUsd : null;
+    // Delivery is only charged when there is something to deliver — and never
+    // on a table order, which travels no further than the table.
+    const deliveryFeeUsd =
+        mode === 'table' || items.length === 0 ? null : pricing.deliveryFeeUsd;
     const totalUsd = subtotalUsd + (deliveryFeeUsd ?? 0);
 
     const checkout = useCheckout({
+        mode,
+        whatsappNumber,
+        spots,
         items,
         pricing,
         subtotalUsd,
@@ -108,7 +123,9 @@ export function CartSheet() {
                 <DialogContent className="flex h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:h-auto sm:max-h-[88vh]">
                     <DialogHeader className="shrink-0 border-b border-primary/15 p-5 pr-14">
                         <DialogTitle className="flex items-center gap-2.5">
-                            {STEP_TITLES[checkout.step]}
+                            {checkout.step === 'cart'
+                                ? copy.title
+                                : STEP_TITLES[checkout.step]}
                             {checkout.step === 'cart' && count > 0 && (
                                 <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
                                     {count}
@@ -121,6 +138,12 @@ export function CartSheet() {
                         <DetailsStep
                             requireFullName={checkout.requireFullName}
                             requirePhoneNumber={checkout.requirePhoneNumber}
+                            requireSpot={checkout.requireSpot}
+                            spots={checkout.spots}
+                            spotId={checkout.spotId}
+                            onSpotChange={checkout.setSpotId}
+                            hint={copy.detailsHint}
+                            backLabel={`Back to ${copy.title.toLowerCase()}`}
                             name={checkout.name}
                             onNameChange={checkout.setName}
                             phone={checkout.phone}
@@ -159,7 +182,7 @@ export function CartSheet() {
                             <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-14 text-center">
                                 <ShoppingBag className="size-9 text-primary/25" />
                                 <p className="text-sm text-foreground/80">
-                                    Your order is empty
+                                    {copy.emptyTitle}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     Add a few things from the menu to get
@@ -241,8 +264,8 @@ export function CartSheet() {
                                     >
                                         <Trash2 className="size-3.5" />
                                         {confirmingClear
-                                            ? 'Tap again to empty'
-                                            : 'Empty the cart'}
+                                            ? copy.clearConfirm
+                                            : copy.clear}
                                     </button>
                                 </div>
                             </>

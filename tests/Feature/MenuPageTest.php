@@ -4,17 +4,34 @@ use App\Enums\OrderType;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Slide;
+use App\Models\Spot;
 use App\Settings\GeneralSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 
+/**
+ * Apply the given values to the general settings and persist them.
+ *
+ * @param  array<string, mixed>  $values
+ */
+function settingsFor(array $values): GeneralSettings
+{
+    $settings = app(GeneralSettings::class);
+
+    foreach ($values as $key => $value) {
+        $settings->{$key} = $value;
+    }
+
+    $settings->save();
+
+    return $settings;
+}
+
 /** Turn the delivery menu on so both order types are reachable by default. */
 beforeEach(function (): void {
-    $settings = app(GeneralSettings::class);
-    $settings->online_ordering_active = true;
-    $settings->save();
+    settingsFor(['online_ordering_active' => true]);
 });
 
 it('renders the dine-in menu with its categories and products', function (): void {
@@ -129,4 +146,58 @@ it('sends delivery customers back to dine-in while the delivery menu is off', fu
     $settings->save();
 
     $this->get(route('menu.delivery'))->assertRedirect(route('menu.dine-in'));
+});
+
+it('offers the dine-in menu the tables an order can be seated at', function (): void {
+    Spot::factory()->create(['name' => 'Fireplace', 'sort_order' => 1]);
+    Spot::factory()->create(['name' => 'Terrace', 'sort_order' => 2]);
+
+    $this->get(route('menu.dine-in'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tableSpots', 2)
+            ->where('tableSpots.0.name', 'Fireplace')
+            ->where('tableSpots.1.name', 'Terrace'));
+});
+
+it('keeps landmarks and hidden spots off the table picker', function (): void {
+    Spot::factory()->create(['name' => 'Fireplace']);
+    Spot::factory()->landmark()->create(['name' => 'WC']);
+    Spot::factory()->inactive()->create(['name' => 'Being repainted']);
+
+    $this->get(route('menu.dine-in'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tableSpots', 1)
+            ->where('tableSpots.0.name', 'Fireplace'));
+});
+
+it('leaves the delivery menu without tables to seat an order at', function (): void {
+    Spot::factory()->create(['name' => 'Fireplace']);
+
+    $this->get(route('menu.delivery'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('tableSpots', 0));
+});
+
+it('hands each menu the number its orders are sent to', function (): void {
+    settingsFor(['whatsapp_number' => '+9613000000']);
+
+    $this->get(route('menu.dine-in'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('orderWhatsappNumber', '+9613000000'));
+});
+
+it('still takes table orders while the delivery menu is switched off', function (): void {
+    settingsFor([
+        'online_ordering_active' => false,
+        'whatsapp_number' => '+9613000000',
+    ]);
+    Spot::factory()->create(['name' => 'Fireplace']);
+
+    // A dine-in-only shop is exactly the case table ordering exists for, so the
+    // number and the tables both survive the delivery switch being off.
+    $this->get(route('menu.dine-in'))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->where('orderWhatsappNumber', '+9613000000')
+            ->has('tableSpots', 1));
 });
