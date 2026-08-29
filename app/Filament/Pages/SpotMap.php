@@ -111,14 +111,24 @@ class SpotMap extends Page
             ],
         )->validate()['positions'] ?? [];
 
-        foreach (Spot::query()->get(['id']) as $spot) {
-            $pin = $validated[$spot->id] ?? null;
-
-            $spot->update([
-                'map_x' => $pin === null ? null : round((float) $pin['x'], 2),
-                'map_y' => $pin === null ? null : round((float) $pin['y'], 2),
+        // The pins are written straight through the query builder rather than
+        // through a model save: a save re-runs the slug generation, which reads
+        // the spot's name, and the map has no reason to load — or to touch —
+        // anything but the two coordinates.
+        foreach ($validated as $id => $pin) {
+            Spot::query()->whereKey($id)->update([
+                'map_x' => round((float) $pin['x'], 2),
+                'map_y' => round((float) $pin['y'], 2),
             ]);
         }
+
+        Spot::query()
+            ->when(
+                $validated !== [],
+                fn ($query) => $query->whereKeyNot(array_keys($validated)),
+            )
+            ->whereNotNull('map_x')
+            ->update(['map_x' => null, 'map_y' => null]);
 
         unset($this->positions);
 

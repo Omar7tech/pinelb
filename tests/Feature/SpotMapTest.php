@@ -167,6 +167,20 @@ it('saves the arranged layout and clears the pins left off it', function (): voi
         ->and($cleared->fresh()->map_y)->toBeNull();
 });
 
+it('leaves the slugs alone when the layout is saved', function (): void {
+    $this->actingAs(User::factory()->create());
+
+    $placed = Spot::factory()->create(['name' => 'Fireplace']);
+    $untouched = Spot::factory()->placedAt(80, 80)->create(['name' => 'Terrace']);
+
+    Livewire::test(SpotMap::class)
+        ->call('saveLayout', [$placed->id => ['x' => 25.5, 'y' => 33.25]])
+        ->assertHasNoErrors();
+
+    expect($placed->fresh()->slug)->toBe('fireplace')
+        ->and($untouched->fresh()->slug)->toBe('terrace');
+});
+
 it('rejects a pin placed outside the map', function (): void {
     $this->actingAs(User::factory()->create());
 
