@@ -81,6 +81,9 @@ export function CartSheet({ whatsappNumber, spots = [] }: CartSheetProps) {
         subtotalUsd,
         deliveryFeeUsd,
         totalUsd,
+        // Empty the cart as soon as the order leaves for WhatsApp, so coming
+        // back to the menu doesn't carry the last order's items.
+        onSent: clear,
     });
 
     const [confirmingClear, setConfirmingClear] = useState(false);

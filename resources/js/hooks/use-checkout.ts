@@ -70,6 +70,12 @@ type CheckoutInput = {
     subtotalUsd: number;
     deliveryFeeUsd: number | null;
     totalUsd: number;
+    /**
+     * Called once the order has been handed to WhatsApp, so the cart can be
+     * emptied — the order is placed, and a customer coming back to the menu
+     * should start from scratch rather than last order's items.
+     */
+    onSent?: () => void;
 };
 
 /**
@@ -85,6 +91,7 @@ export function useCheckout({
     subtotalUsd,
     deliveryFeeUsd,
     totalUsd,
+    onSent,
 }: CheckoutInput) {
     const { checkout } = usePage().props;
     const { getClientLocation } = checkout;
@@ -173,6 +180,13 @@ export function useCheckout({
             setWhatsappUrl(url);
             setStep('sending');
 
+            // The order is on its way, so the cart has served its purpose. The
+            // link is already held in state, so the manual fallback button
+            // still works after this.
+            onSent?.();
+            setOrderNote('');
+            setSpotId(null);
+
             // Let the "Opening WhatsApp…" state paint before handing off. A
             // same-tab navigation (rather than window.open) is never blocked as
             // a popup — notably on iOS Safari — and deep-links into the app.
@@ -195,6 +209,7 @@ export function useCheckout({
             phone,
             selectedSpot,
             orderNote,
+            onSent,
         ],
     );
 
